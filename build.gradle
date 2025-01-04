@@ -68,6 +68,13 @@ subprojects {
     maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
     maven { url 'https://jitpack.io' }
   }
+
+  dependencies {
+    implementation 'com.google.code.gson:gson:2.10'
+    implementation 'com.github.filosganga:geogson-core:1.2.21'
+    implementation 'org.wololo:jts2geojson:0.18.1'
+    implementation "org.json:json:20220320"
+  }
 }
 
 eclipse.project.name = 'elektropolnilnice-igra' + '-parent'
