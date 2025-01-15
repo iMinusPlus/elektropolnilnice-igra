@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -13,28 +12,26 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import eu.elektropolnilnice.igra.minigame_david.DavidGame;
-import eu.elektropolnilnice.igra.minigame_david.assets.AssetDescriptors;
-import eu.elektropolnilnice.igra.minigame_david.config.GameConfig;
+import eu.elektropolnilnice.igra.GameConfig;
+import eu.elektropolnilnice.igra.Main;
+import eu.elektropolnilnice.igra.assets.AssetDescriptors;
 
-public class MenuScreen extends ScreenAdapter {
+public class DavidMenuScreen extends ScreenAdapter {
 
-    private final DavidGame game;
     private final AssetManager assetManager;
 
     private Viewport viewport;
     private Stage stage;
     private Skin skin;
 
-    public MenuScreen(DavidGame game) {
-        this.game = game;
-        this.assetManager = game.getAssetManager();
+    public DavidMenuScreen() {
+        assetManager = Main.Instance().getAssetManager();
     }
 
     @Override
     public void show() {
         viewport = new FitViewport(GameConfig.HUD_WIDTH, GameConfig.HUD_HEIGHT);
-        stage = new Stage(viewport, game.getBatch());
+        stage = new Stage(viewport, Main.Instance().getBatch());
 
         assetManager.load(AssetDescriptors.UI_SKIN);
         assetManager.finishLoading();
@@ -77,7 +74,7 @@ public class MenuScreen extends ScreenAdapter {
         playButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new GameScreen(game));
+                Main.Instance().setScreen(new GameScreen());
             }
         });
 
