@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="30" height="30" tilewidth="32" tileheight="32" infinite="0" nextlayerid="4" nextobjectid="1">
+ <tileset firstgid="1" source="roads2W.tsx"/>
+ <tileset firstgid="97" source="grass.tsx"/>
+ <layer id="1" name="ozadje" width="30" height="30">
+  <data encoding="base64" compression="zlib">
+   eJztwwENAAAMw6BanX8TF3JIWDVVVVXfPQjnVRQ=
+  </data>
+ </layer>
+ <layer id="2" name="cesta" width="30" height="30">
+  <data encoding="base64" compression="zlib">
+   eJzt0rsOgkAQheFtQEBbkYuNF8AWFOX9n4y/mZZAstlJZE7yZcuTyVnnLFtyxEmht8ZVofeARKH3gkKhV+694Y4HngF65d4eA974BOjt8EKD1oXb+4cJI75Of+/Q8X2v/NcI8cIrO/uK/Ncz8oVXdvaVf9ltbfZ2b4pMobdEpdBrsVgs2pkB+eEHBQ==
+  </data>
+ </layer>
+ <objectgroup id="3" name="Object Layer 1"/>
+</map>
