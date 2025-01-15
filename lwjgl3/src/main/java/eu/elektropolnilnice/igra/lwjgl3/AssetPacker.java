@@ -6,7 +6,7 @@ public class AssetPacker {
 
     private static final boolean DRAW_DEBUG_OUTLINE = false;
 
-    private static final String RAW_ASSETS_PATH = "lwjgl3/assets-raw";
+    private static final String RAW_ASSETS_PATH = "assets_raw";
     private static final String ASSETS_PATH = "assets";
 
     public static void main(String[] args) {
@@ -15,7 +15,7 @@ public class AssetPacker {
         settings.useIndexes = false; // Onemogoči uporabo indexov za razlikovanje slik
 
         TexturePacker.process(settings,
-            RAW_ASSETS_PATH + "/gameplay",
+            RAW_ASSETS_PATH + "/gameplay_david",
             ASSETS_PATH + "/gameplay",
             "gameplay"
         );
