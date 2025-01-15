@@ -4,7 +4,7 @@ import com.badlogic.gdx.*;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Logger;
-import eu.elektropolnilnice.igra.minigame_david.screen.MenuScreen;
+import eu.elektropolnilnice.igra.minigame_david.screen.DavidMenuScreen;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class DavidGame extends Game {
@@ -21,7 +21,7 @@ public class DavidGame extends Game {
 
         batch = new SpriteBatch();
 
-        setScreen(new MenuScreen(this));
+        setScreen(new DavidMenuScreen());
     }
 
     @Override

@@ -13,28 +13,27 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import eu.elektropolnilnice.igra.Main;
 import eu.elektropolnilnice.igra.minigame_david.DavidGame;
 import eu.elektropolnilnice.igra.minigame_david.assets.AssetDescriptors;
 import eu.elektropolnilnice.igra.minigame_david.config.GameConfig;
 
 public class GameScreen extends ScreenAdapter {
 
-    private final DavidGame game;
     private final AssetManager assetManager;
 
     private Viewport viewport;
     private Stage stage;
     private Skin skin;
 
-    public GameScreen(DavidGame game) {
-        this.game = game;
-        this.assetManager = game.getAssetManager();
+    public GameScreen() {
+        this.assetManager = Main.Instance().getAssetManager();
     }
 
     @Override
     public void show() {
         viewport = new FitViewport(GameConfig.HUD_WIDTH, GameConfig.HUD_HEIGHT);
-        stage = new Stage(viewport, game.getBatch());
+        stage = new Stage(viewport, Main.Instance().getBatch());
 
         skin = assetManager.get(AssetDescriptors.UI_SKIN);
 
@@ -73,7 +72,7 @@ public class GameScreen extends ScreenAdapter {
         TextButton backButton = new TextButton("Back to Menu", skin);
         backButton.addListener(event -> {
             if (event.isHandled()) {
-                game.setScreen(new MenuScreen(game));
+                Main.Instance().setScreen(new DavidMenuScreen());
             }
             return true;
         });

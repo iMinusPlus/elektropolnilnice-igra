@@ -18,6 +18,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import eu.elektropolnilnice.igra.GameConfig;
 import eu.elektropolnilnice.igra.Main;
 import eu.elektropolnilnice.igra.assets.AssetDescriptors;
+import eu.elektropolnilnice.igra.minigame_david.screen.DavidMenuScreen;
 
 public class MenuScreen extends ScreenAdapter {
 
@@ -81,6 +82,7 @@ public class MenuScreen extends ScreenAdapter {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 Gdx.app.log("MenuScreen", "Setting david screen");
+                Main.Instance().setScreen(new DavidMenuScreen());
             }
         });
 
