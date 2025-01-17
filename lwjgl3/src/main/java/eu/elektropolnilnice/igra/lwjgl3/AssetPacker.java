@@ -11,13 +11,16 @@ public class AssetPacker {
 
     public static void main(String[] args) {
         TexturePacker.Settings settings = new TexturePacker.Settings();
+        settings.maxWidth = 4096;
+        settings.maxHeight = 4096;
+
         settings.debug = DRAW_DEBUG_OUTLINE;
-        settings.useIndexes = false; // Onemogoči uporabo indexov za razlikovanje slik
+        settings.useIndexes = false;
 
         TexturePacker.process(settings,
-            RAW_ASSETS_PATH + "/gameplay_david",
+            RAW_ASSETS_PATH + "/gameplay_name",
             ASSETS_PATH + "/gameplay",
-            "gameplay"
+            "gameplay_name"
         );
 
 //        TexturePacker.process(settings,

@@ -10,7 +10,10 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapObjects;
+import com.badlogic.gdx.maps.MapProperties;
+import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
@@ -45,6 +48,7 @@ public class GameScreen extends ScreenAdapter {
 
     private TiledMap tiledMap;
     private TiledMapTileLayer grassLayer;
+    private TiledMapTileLayer roadLayer;
     private MapObjects mapObjects;
     private OrthogonalTiledMapRenderer tiledMapRenderer;
 
@@ -76,6 +80,7 @@ public class GameScreen extends ScreenAdapter {
 
         // Pridobivanje dimenzij zemljevida
         grassLayer = (TiledMapTileLayer) tiledMap.getLayers().get("ozadje");
+        roadLayer = (TiledMapTileLayer) tiledMap.getLayers().get("cesta");
         tileWidth = grassLayer.getTileWidth();
         tileHeight = grassLayer.getTileHeight();
         mapWidthInPx = grassLayer.getWidth() * tileWidth;
@@ -90,7 +95,7 @@ public class GameScreen extends ScreenAdapter {
         carTexture = new Texture("gameplay/carBlue.png");
         player = new Sprite(carTexture);
         player.setScale(0.35f); // Pomanjšamo igralca na 50% originalne velikosti
-        player.setPosition(mapWidthInPx / 2f - player.getWidth() / 2f, 0);
+        setPlayerStartPosition();
 
         font = new BitmapFont();
 
@@ -112,10 +117,8 @@ public class GameScreen extends ScreenAdapter {
 
         handleConfigurationInput();
 
-        if (health > 0) {
-            handleGameplayInput();
-            update();
-        }
+        handleGameplayInput();
+
 
         // Kamera sledi igralcu
         camera.position.set(
@@ -138,22 +141,47 @@ public class GameScreen extends ScreenAdapter {
         stage.draw();
     }
 
+    private boolean isTileWalkable(int tileX, int tileY) {
+        TiledMapTileLayer.Cell cell = roadLayer.getCell(tileX, tileY);
+
+        MapProperties properties = cell.getTile().getProperties();
+        return properties.containsKey("walkable") && properties.get("walkable", Boolean.class);
+    }
 
 
     private void handleGameplayInput() {
+        float moveAmount = 100 * Gdx.graphics.getDeltaTime();
+        float newPlayerX = player.getX();
+        float newPlayerY = player.getY();
+
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-            player.setX(player.getX() - 100 * Gdx.graphics.getDeltaTime());
+            newPlayerX -= moveAmount;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-            player.setX(player.getX() + 100 * Gdx.graphics.getDeltaTime());
+            newPlayerX += moveAmount;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-            player.setY(player.getY() + 100 * Gdx.graphics.getDeltaTime());
+            newPlayerY += moveAmount;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-            player.setY(player.getY() - 100 * Gdx.graphics.getDeltaTime());
+            newPlayerY -= moveAmount;
+        }
+
+        int tileX = (int) ((newPlayerX + player.getWidth() / 2) / tileWidth);
+        int tileY = (int) ((newPlayerY + player.getHeight() / 2) / tileHeight);
+
+//        player.setPosition(newPlayerX, newPlayerY);
+        // Debug izpis
+        System.out.println("TileX: " + tileX + ", TileY: " + tileY + ", Walkable: " + isTileWalkable(tileX, tileY));
+
+        if (isTileWalkable(tileX, tileY)) {
+            System.out.println("Moving player to X: " + newPlayerX + ", Y: " + newPlayerY);
+            player.setPosition(newPlayerX, newPlayerY);
+        } else {
+            System.out.println("Tile not walkable!");
         }
     }
+
 
     private void handleConfigurationInput() {
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
@@ -177,25 +205,37 @@ public class GameScreen extends ScreenAdapter {
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) {
             tiledMap.getLayers().get("cesta").setVisible(!tiledMap.getLayers().get("cesta").isVisible());
         }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.PLUS)) {
+            camera.zoom = Math.max(0.1f, camera.zoom - 0.1f);
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.MINUS)) {
+            camera.zoom = Math.min(2f, camera.zoom + 0.1f);
+        }
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             Gdx.app.exit();
         }
+        camera.update();
     }
 
-    private void update() {
-        // calculate tile coordinates
-        int tileX = (int) ((player.getX() + player.getWidth() / 2) / tileWidth);
-        int tileY = (int) ((player.getY() + player.getHeight() / 2) / tileHeight);
+    private void setPlayerStartPosition() {
+        MapObjects objects = tiledMap.getLayers().get("PlayerSpawn").getObjects();
+        MapObject spawnPoint = objects.get("PlayerSpawn");
 
+        float scaledWidth = player.getWidth() * player.getScaleX();
+        float scaledHeight = player.getHeight() * player.getScaleY();
 
-        // check collision between player and obstacles
-//        for (MapObject mapObject : mapObjects) {
-//            if (player.getBoundingRectangle().overlaps(((RectangleMapObject) mapObject).getRectangle())) {
-//                sound.play();
-//                health--;
-//            }
-//        }
+        if (spawnPoint instanceof RectangleMapObject) {
+            RectangleMapObject rectangleObject = (RectangleMapObject) spawnPoint;
+
+            float spawnX = rectangleObject.getRectangle().getX();
+            float spawnY = rectangleObject.getRectangle().getY();
+
+            player.setPosition(spawnX - scaledWidth / 2f, spawnY - scaledHeight / 2f);
+        } else {
+            player.setPosition(mapWidthInPx / 2f - scaledWidth / 2f, 0);
+        }
     }
+
 
     @Override
     public void hide() {
