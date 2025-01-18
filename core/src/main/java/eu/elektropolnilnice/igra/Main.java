@@ -8,9 +8,13 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import eu.elektropolnilnice.igra.assets.AssetDescriptors;
 import eu.elektropolnilnice.igra.screen.MenuScreen;
+import eu.elektropolnilnice.igra.utils.Station;
+
+import java.io.IOException;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends Game {
@@ -20,6 +24,7 @@ public class Main extends Game {
     private AssetManager assetManager;
     private GameManager gameManager;
     private SpriteBatch batch;
+    private Array<Station> stations;
 
     public Main() {
         instance = this;
@@ -43,6 +48,12 @@ public class Main extends Game {
         init();
         loadAssets();
         gameManager = new GameManager();
+
+        try {
+            stations = Station.getStations();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         //TODO: make intro screen mby
         setScreen(new MenuScreen());
@@ -72,7 +83,7 @@ public class Main extends Game {
 //        assetManager.setLoader(TiledMap.class, new TmxMapLoader(new InternalFileHandleResolver()));
 //        assetManager.load(AssetDescriptors.MAP);
 //        assetManager.load(AssetDescriptors.TILE_MAP);
-//        assetManager.finishLoading();
+        assetManager.finishLoading();
     }
 
     public AssetManager getAssetManager() {
@@ -85,5 +96,9 @@ public class Main extends Game {
 
     public GameManager getGameManager() {
         return gameManager;
+    }
+
+    public Array<Station> getStations() {
+        return stations;
     }
 }
