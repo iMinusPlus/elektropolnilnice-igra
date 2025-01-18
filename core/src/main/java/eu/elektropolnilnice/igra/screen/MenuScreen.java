@@ -78,6 +78,7 @@ public class MenuScreen extends ScreenAdapter {
         TextButton playButtonDavid = new TextButton("David", skin);
         TextButton playButtonFilip = new TextButton("Filip", skin);
         TextButton playButtonGabi = new TextButton("Gabi", skin);
+        TextButton backButton = new TextButton("Back", skin);
 
         playButtonDavid.addListener(new ClickListener() {
             @Override
@@ -91,6 +92,7 @@ public class MenuScreen extends ScreenAdapter {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 Gdx.app.log("MenuScreen", "Setting filip screen");
+                Main.Instance().setScreen(new eu.elektropolnilnice.igra.minigame_filip.StartScreen());
             }
         });
 
@@ -102,11 +104,20 @@ public class MenuScreen extends ScreenAdapter {
             }
         });
 
+        backButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Gdx.app.log("MenuScreen", "Setting Tile screen");
+                Main.Instance().setScreen(new MapScreen());
+            }
+        });
+
         table.add(title).center();
         table.row();
         table.add(playButtonDavid).center().row();
         table.add(playButtonFilip).center().row();
         table.add(playButtonGabi).center().row();
+        table.add(backButton).center().row();
         table.center();
         table.setFillParent(true);
 
