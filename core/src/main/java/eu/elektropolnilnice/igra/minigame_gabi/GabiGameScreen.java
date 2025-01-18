@@ -16,6 +16,10 @@ import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class GabiGameScreen extends ScreenAdapter {
     private OrthographicCamera camera;
 
@@ -37,8 +41,15 @@ public class GabiGameScreen extends ScreenAdapter {
 
     private BitmapFont font;
 
-    private int health;
-    private int score;
+    private float elapsedTime;
+    private int laps;
+    private boolean raceCompleted;
+
+    float timeSinceFinish = 0f;
+
+    private List<Float> leaderboard;
+
+    Boolean hasCollided = false;
 
     @Override
     public void show() {
@@ -51,6 +62,7 @@ public class GabiGameScreen extends ScreenAdapter {
         road = (TiledMapTileLayer) tiledMap.getLayers().get("Road");
         blockersObj = tiledMap.getLayers().get("Barriers").getObjects();
         blockers = (TiledMapTileLayer) tiledMap.getLayers().get("Blockers");
+        finishLine = tiledMap.getLayers().get("Finish line").getObjects();
 
         tileWidth = background.getTileWidth();
         tileHeight = background.getTileHeight();
@@ -60,108 +72,117 @@ public class GabiGameScreen extends ScreenAdapter {
         camera.setToOrtho(false, mapWidthInPx, mapHeightInPx);
         camera.update();
 
-        //hitSound = Gdx.audio.newSound(Gdx.files.internal("tiled/hit.wav"));
-        //drinkSound = Gdx.audio.newSound(Gdx.files.internal("tiled/drink.mp3"));
         car = new Texture("assets_raw/gameplay_gabi/car.png");
         player = new Sprite(car);
-        player.setPosition(camera.viewportWidth /2f - player.getWidth() / 2f, camera.viewportHeight /2f - player.getHeight() / 2f);
+        player.setPosition(600f, 850f);
+        player.setRotation(90);
 
         font = new BitmapFont();
+        font.getData().setScale(5f);
 
-        health = 100;
-        score = 0;
+        elapsedTime = 0;
+        laps = 0;
+        raceCompleted = false;
+
+        leaderboard = new ArrayList<>();
     }
 
     @Override
     public void render(float delta) {
         ScreenUtils.clear(0f, 0f, 0f, 1f);
 
-        handleConfigurationInput();
+        float deltaTime = Gdx.graphics.getDeltaTime();
+        timeSinceFinish += deltaTime;
+
+        if (!raceCompleted) {
+            elapsedTime += delta;
+            handleGameplayInput(delta);
+            checkCollisions();
+        }
 
         camera.update();
         tiledMapRenderer.setView(camera);
         tiledMapRenderer.render();
         tiledMapRenderer.getBatch().begin();
 
-        if (health > 0) {
-            handleGameplayInput();
-            update();
-        }else{
-            font.draw(tiledMapRenderer.getBatch(), "GAME OVER", camera.viewportWidth / 2f - 50f, camera.viewportHeight / 2f);
+        player.draw(tiledMapRenderer.getBatch());
+        font.draw(tiledMapRenderer.getBatch(), "Laps: " + laps + "/3", 20f, 70f);
+        font.draw(tiledMapRenderer.getBatch(), "Time: " + String.format("%.2f", elapsedTime), 20f, 120f);
+
+        if (raceCompleted) {
+            font.draw(tiledMapRenderer.getBatch(), "Race Complete!", camera.viewportWidth / 2f - 50f, camera.viewportHeight / 2f);
+            font.draw(tiledMapRenderer.getBatch(), "Leaderboard:", camera.viewportWidth / 2f - 50f, camera.viewportHeight / 2f - 20f);
+            for (int i = 0; i < leaderboard.size(); i++) {
+                font.draw(tiledMapRenderer.getBatch(), (i + 1) + ". " + String.format("%.2f", leaderboard.get(i)), camera.viewportWidth / 2f - 50f, camera.viewportHeight / 2f - 40f - (i * 20));
+            }
         }
 
-
-        player.draw(tiledMapRenderer.getBatch());
-        font.draw(tiledMapRenderer.getBatch(), "SCORE: " + score, 20f, 20f);
-        font.draw(tiledMapRenderer.getBatch(), "HEALTH: " + health, 20f, 30f + font.getCapHeight());
         tiledMapRenderer.getBatch().end();
     }
 
-    private void handleConfigurationInput() {
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            camera.translate(-8, 0);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            camera.translate(8, 0);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-            camera.translate(0, 8);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-            camera.translate(0, -8);
-        }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.BACKSPACE)) {
-            camera.position.set(mapWidthInPx / 2f, mapHeightInPx / 2f, 0);
-        }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) {
-            tiledMap.getLayers().get("Background").setVisible(!tiledMap.getLayers().get("Background").isVisible());
-        }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) {
-            tiledMap.getLayers().get("Background").setVisible(!tiledMap.getLayers().get("Background").isVisible());
-        }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_3)) {
-            tiledMap.getLayers().get("Structures").setVisible(!tiledMap.getLayers().get("Structures").isVisible());
-        }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            Gdx.app.exit();
-        }
-    }
+    private void handleGameplayInput(float delta) {
+        float speed = 700f; // Movement speed in pixels per second
+        float rotationSpeed = 200f; // Rotation speed in degrees per second
 
-    private void handleGameplayInput() {
-        float nextX = player.getX();
-        float nextY = player.getY();
 
+        // Movement deltas
+        float dx = 0;
+        float dy = 0;
+
+        // Forward movement (W key)
+        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+            dx += (float) Math.cos(Math.toRadians(player.getRotation())) * speed * delta;
+            dy += (float) Math.sin(Math.toRadians(player.getRotation())) * speed * delta;
+        }
+
+        // Backward movement (S key)
+        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+            dx -= (float) Math.cos(Math.toRadians(player.getRotation())) * speed * delta;
+            dy -= (float) Math.sin(Math.toRadians(player.getRotation())) * speed * delta;
+        }
+
+        // Rotation (A and D keys)
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-            nextX -= 100 * Gdx.graphics.getDeltaTime();
+            player.rotate(rotationSpeed * delta); // Rotate counterclockwise
         }
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-            nextX += 100 * Gdx.graphics.getDeltaTime();
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-            nextY += 100 * Gdx.graphics.getDeltaTime();
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-            nextY -= 100 * Gdx.graphics.getDeltaTime();
+            player.rotate(-rotationSpeed * delta); // Rotate clockwise
         }
 
-        // Check collision with structures
+        // Calculate the next position
+        float nextX = player.getX() + dx;
+        float nextY = player.getY() + dy;
+
+        // Check for collisions before applying the movement
         if (!isCollidingWithStructures(nextX, nextY)) {
             player.setPosition(nextX, nextY);
         }
     }
 
-    private void update() {
-        // calculate tile coordinates
-        int tileX = (int) ((player.getX() + player.getWidth() / 2) / tileWidth);
-        int tileY = (int) ((player.getY() + player.getHeight() / 2) / tileHeight);
-
-
-        // check collision between player and obstacles
+    private void checkCollisions() {
         for (MapObject mapObject : blockersObj) {
             if (player.getBoundingRectangle().overlaps(((RectangleMapObject) mapObject).getRectangle())) {
-                if (isCollidingWithStructures(player.getX(), player.getY())) {
-                    //TODO: make collision for barriers
-                }
+                // Bump back to road
+                float roadX = Math.max(0, Math.min(player.getX(), mapWidthInPx - player.getWidth()));
+                float roadY = Math.max(0, Math.min(player.getY(), mapHeightInPx - player.getHeight()));
+                player.setPosition(roadX, roadY);
+            }
+        }
+
+        for (MapObject mapObject : finishLine) {
+            if (hasCollided){
+                return;
+            }
+
+            if (player.getBoundingRectangle().overlaps(((RectangleMapObject) mapObject).getRectangle())) {
+                    laps++;
+                    if (laps >= 3) {
+                        raceCompleted = true;
+                        leaderboard.add(elapsedTime);
+                        Collections.sort(leaderboard);
+
+                        hasCollided = true;
+                    }
             }
         }
     }
@@ -170,10 +191,8 @@ public class GabiGameScreen extends ScreenAdapter {
         int tileX = (int) ((nextX + player.getWidth() / 2) / tileWidth);
         int tileY = (int) ((nextY + player.getHeight() / 2) / tileHeight);
 
-        // Return true if there's a non-null cell in the structure layer
         return blockers.getCell(tileX, tileY) != null;
     }
-
 
     @Override
     public void dispose() {
