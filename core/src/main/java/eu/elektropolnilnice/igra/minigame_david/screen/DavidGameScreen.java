@@ -1,10 +1,10 @@
 package eu.elektropolnilnice.igra.minigame_david.screen;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -19,6 +19,7 @@ import eu.elektropolnilnice.igra.GameConfig;
 import eu.elektropolnilnice.igra.Main;
 import eu.elektropolnilnice.igra.assets.AssetDescriptors;
 import eu.elektropolnilnice.igra.assets.RegionNames;
+import eu.elektropolnilnice.igra.minigame_david.object.Car;
 
 public class DavidGameScreen extends ScreenAdapter {
 
@@ -30,8 +31,18 @@ public class DavidGameScreen extends ScreenAdapter {
     private Skin skin;
     private TextureAtlas gameplay;
 
-    private float backgroundX; // X koordinata ozadja
-    private static final float BACKGROUND_SPEED = 100f; // Hitrost premikanja ozadja
+    private float backgroundX;
+    private static float BACKGROUND_SPEED = 0f;
+
+    Car player1Car;
+    Car player2Car;
+    Car leadCar;
+    Car lastCar;
+
+    Label labelPlayer1;
+    Label labelPlayer2;
+
+    private boolean gameover = false;
 
     public DavidGameScreen() {
         assetManager = Main.Instance().getAssetManager();
@@ -50,6 +61,9 @@ public class DavidGameScreen extends ScreenAdapter {
         skin = assetManager.get(AssetDescriptors.UI_SKIN);
         gameplay = assetManager.get(AssetDescriptors.DAVID_GAMEPLAY);
 
+        player1Car = new Car("Player 1", 50f, 300f, 50f, gameplay.findRegion(RegionNames.CAR_1));
+        player2Car = new Car("Player 2", 50f, 550f, 50f, gameplay.findRegion(RegionNames.CAR_2));
+
         stage.addActor(bottomNavigation());
         Gdx.input.setInputProcessor(stage);
     }
@@ -63,23 +77,106 @@ public class DavidGameScreen extends ScreenAdapter {
     public void render(float delta) {
         ScreenUtils.clear(Color.LIGHT_GRAY);
 
-        backgroundX -= BACKGROUND_SPEED * delta;
-        if (backgroundX <= -gameplay.findRegion(RegionNames.BACKGROUND).getRegionWidth()) {
-            backgroundX = 0; // Ponovi ozadje
+        if (player1Car.getSpeed() >= 1000 || player2Car.getSpeed() >= 1000) {
+            gameover = true;
+        }
+
+        if (gameover) {
+            // dolocimo zmagovalca in izpis
+            if (leadCar == player1Car) {
+                labelPlayer1.setText(player1Car.getName() + ": 1. place");
+                labelPlayer2.setText(player2Car.getName() + ": 2. place");
+            } else if (leadCar == player2Car) {
+                labelPlayer2.setText(player2Car.getName() + ": 1. place");
+                labelPlayer1.setText(player1Car.getName() + ": 2. place");
+            } else {
+                labelPlayer2.setText("TIE");
+                labelPlayer1.setText("TIE");
+            }
+
+            BACKGROUND_SPEED = 0f;
+
+            // premik avtov preko okna
+            player1Car.setX(player1Car.getX() + player1Car.getSpeed() * Gdx.graphics.getDeltaTime());
+            player2Car.setX(player2Car.getX() + player2Car.getSpeed() * Gdx.graphics.getDeltaTime());
+
+            // premik ozadja
+            backgroundX -= BACKGROUND_SPEED * delta;
+            if (backgroundX <= -gameplay.findRegion(RegionNames.BACKGROUND).getRegionWidth()) {
+                backgroundX = 0; // Ponovi ozadje
+            }
+
+        }else {
+            player1Car.update(delta, Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.RIGHT));
+            player2Car.update(delta, Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.D));
+
+            labelPlayer1.setText("Player 1 Speed: " + (int) player1Car.getSpeed()/10 + "km/h");
+            labelPlayer2.setText("Player 2 Speed: " + (int) player2Car.getSpeed()/10 + "km/h");
+
+            // dolocanje hitrosti ozadja na podlagi hitrejsega avtomobila
+            BACKGROUND_SPEED = Math.max(player1Car.getSpeed(), player2Car.getSpeed());
+
+            // dolocanje vodilnega in zadnjega
+            if (player1Car.getSpeed() > player2Car.getSpeed()) {
+                leadCar = player1Car;
+                lastCar = player2Car;
+            } else if (player2Car.getSpeed() > player1Car.getSpeed()) {
+                leadCar = player2Car;
+                lastCar = player1Car;
+            }
+
+            // izracun trenutne razlike med hitrostmi
+            float speedDifference, targetLeadOffset, currentLeadOffset;
+            if (leadCar != null & lastCar != null){
+                speedDifference = Math.abs(leadCar.getSpeed() - lastCar.getSpeed());
+                targetLeadOffset = 100 + speedDifference;
+                currentLeadOffset = leadCar.getX() - lastCar.getX();
+            } else {
+                speedDifference = Math.abs(player1Car.getSpeed() - player2Car.getSpeed());
+                targetLeadOffset = 100 + speedDifference;
+                currentLeadOffset = player1Car.getX() - player2Car.getX();
+            }
+
+            // interpolacija za gladko spremembo pozicije
+            float interpolationSpeed = 5f; // visja vrednost = hitrejsa sprememba
+            float interpolatedLeadOffset = currentLeadOffset + (targetLeadOffset - currentLeadOffset) * delta * interpolationSpeed;
+
+            // nastavljanje pozicij avtomobilov glede na vodstvo
+            if (player1Car.getSpeed() > player2Car.getSpeed()) {
+                player1Car.setX(Math.min(player1Car.getX(), GameConfig.HUD_WIDTH - player1Car.getTexture().getRegionWidth()));
+                player2Car.setX(player1Car.getX() - interpolatedLeadOffset);
+            } else if (player2Car.getSpeed() > player1Car.getSpeed()) {
+                player2Car.setX(Math.min(player2Car.getX(), GameConfig.HUD_WIDTH - player2Car.getTexture().getRegionWidth()));
+                player1Car.setX(player2Car.getX() - interpolatedLeadOffset);
+            }
+
+            // avtomobili ne gredo izven zaslona
+            player1Car.setX(Math.max(50f, Math.min(player1Car.getX(), GameConfig.HUD_WIDTH - player1Car.getTexture().getRegionWidth()*1.2f)));
+            player2Car.setX(Math.max(50f, Math.min(player2Car.getX(), GameConfig.HUD_WIDTH - player2Car.getTexture().getRegionWidth()*1.2f)));
+
+            // premik ozadja
+            backgroundX -= BACKGROUND_SPEED * delta;
+            if (backgroundX <= -gameplay.findRegion(RegionNames.BACKGROUND).getRegionWidth()) {
+                backgroundX = 0;
+            }
         }
 
         batch.begin();
-        batch.draw(gameplay.findRegion(RegionNames.BACKGROUND), backgroundX, 0); // Prvi del ozadja
-        batch.draw(gameplay.findRegion(RegionNames.BACKGROUND), backgroundX + gameplay.findRegion(RegionNames.BACKGROUND).getRegionWidth(), 0); // Drugi del ozadja za ponovitev
 
-        batch.draw(gameplay.findRegion(RegionNames.CAR_1), 50f, 300f);
-        batch.draw(gameplay.findRegion(RegionNames.CAR_2), 50f, 550f);
+        // ozadje (pomikanje ozadja)
+        batch.draw(gameplay.findRegion(RegionNames.BACKGROUND), backgroundX, 0);
+        batch.draw(gameplay.findRegion(RegionNames.BACKGROUND), backgroundX + gameplay.findRegion(RegionNames.BACKGROUND).getRegionWidth(), 0);
+
+        // avtomobili
+        player1Car.render(batch);
+        player2Car.render(batch);
 
         batch.end();
 
         stage.act(delta);
         stage.draw();
     }
+
 
     @Override
     public void hide() {
@@ -91,7 +188,7 @@ public class DavidGameScreen extends ScreenAdapter {
         stage.dispose();
     }
 
-    private Actor bottomNavigation() {
+    private Table bottomNavigation() {
         Table table = new Table();
         table.defaults().pad(20);
 
@@ -103,10 +200,25 @@ public class DavidGameScreen extends ScreenAdapter {
             }
         });
 
-        table.add(backButton).expand().bottom().left().pad(20);
+        labelPlayer1 = new Label("Player 1 Speed: 0", skin);
+        labelPlayer2 = new Label("Player 2 Speed: 0", skin);
+
+        table.bottom().left().pad(20);
+        table.add(backButton).left();
+
+        table.add(labelPlayer1).center();
+        table.add(labelPlayer2).right();
+
         table.setFillParent(true);
+
+        stage.addActor(table);
 
         return table;
     }
+
+
+
+
+
 }
 
