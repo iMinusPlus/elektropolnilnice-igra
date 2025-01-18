@@ -21,10 +21,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import eu.elektropolnilnice.igra.Main;
-import eu.elektropolnilnice.igra.utils.Constants;
-import eu.elektropolnilnice.igra.utils.Geolocation;
-import eu.elektropolnilnice.igra.utils.MapRasterTiles;
-import eu.elektropolnilnice.igra.utils.ZoomXY;
+import eu.elektropolnilnice.igra.utils.*;
 
 import java.io.IOException;
 
@@ -114,6 +111,15 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         shapeRenderer.circle(marker.x, marker.y, 10);
         shapeRenderer.end();
+
+        for (Station station: Main.Instance().getStations()) {
+            Vector2 m = MapRasterTiles.getPixelPosition(station.lattitude, station.longitude, beginTile.x, beginTile.y);
+            shapeRenderer.setProjectionMatrix(camera.combined);
+            shapeRenderer.setColor(Color.GREEN);
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+            shapeRenderer.circle(m.x, m.y, 15);
+            shapeRenderer.end();
+        }
     }
 
     @Override
@@ -131,18 +137,18 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
         Gdx.app.log("touchDown", "x: " + x + " y: " + y);
         touchPosition.set(x, y, 0);
         camera.unproject(touchPosition);
-        return false;
+        return true;
     }
 
     @Override
     public boolean tap(float x, float y, int count, int button) {
         Gdx.app.log("tap", "x: " + x + " y: " + y);
-        Main.Instance().setScreen(new MenuScreen());
         return false;
     }
 
     @Override
     public boolean longPress(float x, float y) {
+        Main.Instance().setScreen(new MenuScreen());
         return false;
     }
 
