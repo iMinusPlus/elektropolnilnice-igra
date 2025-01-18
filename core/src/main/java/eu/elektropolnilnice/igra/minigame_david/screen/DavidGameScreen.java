@@ -192,7 +192,7 @@ public class DavidGameScreen extends ScreenAdapter {
         Table table = new Table();
         table.defaults().pad(20);
 
-        TextButton backButton = new TextButton("BACK", skin);
+        TextButton backButton = new TextButton("BACK", skin, "david");
         backButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -200,8 +200,8 @@ public class DavidGameScreen extends ScreenAdapter {
             }
         });
 
-        labelPlayer1 = new Label("Player 1 Speed: 0", skin);
-        labelPlayer2 = new Label("Player 2 Speed: 0", skin);
+        labelPlayer1 = new Label("Player 1 Speed: 0", skin, "david");
+        labelPlayer2 = new Label("Player 2 Speed: 0", skin, "david");
 
         table.bottom().left().pad(20);
         table.add(backButton).left();
@@ -215,10 +215,5 @@ public class DavidGameScreen extends ScreenAdapter {
 
         return table;
     }
-
-
-
-
-
 }
 

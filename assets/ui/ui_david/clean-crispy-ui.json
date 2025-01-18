@@ -3,6 +3,9 @@ com.badlogic.gdx.graphics.g2d.BitmapFont: {
 	font: {
 		file: font-export.fnt
 	}
+    font-airstrike32: {
+      file: fonts/airstrike_32.fnt
+    }
 }
 com.badlogic.gdx.graphics.Color: {
 	color: {
@@ -11,6 +14,12 @@ com.badlogic.gdx.graphics.Color: {
 		b: 1
 		a: 1
 	}
+    white: {
+      r: 0
+      g: 0
+      b: 0
+      a: 1
+    }
 	selection: {
 		r: 0.70333326
 		g: 0.70333326
@@ -259,7 +268,12 @@ com.badlogic.gdx.scenes.scene2d.ui.Skin$TintedDrawable: {
 		name: white
 		color: selection
 	}
-}
+    // custom ui
+    content-background: {
+      name: white
+      color: { r: 0.0, g: 0.0, b: 0.0, a: 0.7 }
+    }
+},
 com.badlogic.gdx.scenes.scene2d.ui.Button$ButtonStyle: {
 	default: {
 		up: button-c
@@ -356,6 +370,10 @@ com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
 		font: font
 		fontColor: color
 	}
+    david: {
+      font: font-airstrike32,
+      fontColor: color
+    }
 }
 com.badlogic.gdx.scenes.scene2d.ui.List$ListStyle: {
 	default: {
@@ -455,6 +473,13 @@ com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle: {
 		up: button-arcade-c
 		down: button-arcade-pressed-c
 	}
+    david: {
+      up: button-c
+      down: button-pressed-over-c
+      over: button-over-c
+      font: font-airstrike32
+      fontColor: white
+    }
 }
 com.badlogic.gdx.scenes.scene2d.ui.TextField$TextFieldStyle: {
 	default: {

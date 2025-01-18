@@ -4,13 +4,14 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -19,7 +20,7 @@ import eu.elektropolnilnice.igra.Main;
 import eu.elektropolnilnice.igra.assets.AssetDescriptors;
 import eu.elektropolnilnice.igra.assets.RegionNames;
 
-public class DavidMenuScreen extends ScreenAdapter {
+public class DavidHelpScreen extends ScreenAdapter {
 
     private final AssetManager assetManager;
 
@@ -28,7 +29,7 @@ public class DavidMenuScreen extends ScreenAdapter {
     private Skin skin;
     private TextureAtlas gameplay;
 
-    public DavidMenuScreen() {
+    public DavidHelpScreen() {
         assetManager = Main.Instance().getAssetManager();
     }
 
@@ -80,34 +81,51 @@ public class DavidMenuScreen extends ScreenAdapter {
 
     private Actor createUi() {
         Table table = new Table();
-        table.defaults().pad(20);
-
-        Image logo = new Image(gameplay.findRegion(RegionNames.LOGO_1));
-        TextButton playButton = new TextButton("PLAY", skin, "david");
-        TextButton howToPlayButton = new TextButton("HOW TO PLAY", skin, "david");
-
-        playButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                Main.Instance().setScreen(new DavidGameScreen());
-            }
-        });
-
-        howToPlayButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                Main.Instance().setScreen(new DavidHelpScreen());
-            }
-        });
-
-        table.add(logo).center().padBottom(50);
-        table.row();
-        table.add(playButton).center().width(270).height(50);
-        table.row();
-        table.add(howToPlayButton).center().width(270).height(50);
-        table.center();
+        table.defaults().pad(10);
         table.setFillParent(true);
+
+        // Ustvari temni prosojni kvadrat za besedilo
+        Table textTable = new Table();
+        Drawable textTableBackground = skin.getDrawable("content-background");
+        textTable.setBackground(textTableBackground);
+        textTable.pad(20);
+
+        Label instructions = new Label(
+            "Navodila za igro:\n\n" +
+                "Igra je namenjena dvema igralcema. Cilj igre je cim hitreje doseci hitrost 100 km/h.\n\n" +
+                "1. Igralec 1 uporablja tipki LEFT in RIGHT.\n" +
+                "2. Igralec 2 uporablja tipki A in D.\n\n" +
+                "Ce igralec preneha pritiskati, se hitrost zacne zmanjsevati. Zmaga tisti, ki prvi doseze 100 km/h!",
+            skin, "david"
+        );
+        instructions.setWrap(true);
+        instructions.setAlignment(Align.center);
+
+        textTable.add(instructions).growX();
+
+        // Ustvari slike za kontrolne sheme
+        Table imagesTable = new Table();
+//        Image leftImage = new Image(gameplay);
+//        Image rightImage = new Image(rightImageTexture);
+
+//        imagesTable.add(leftImage).width(150).height(150).pad(20);
+//        imagesTable.add(rightImage).width(150).height(150).pad(20);
+
+        // Gumb za vrnitev v meni
+        TextButton backButton = new TextButton("BACK", skin, "david");
+        backButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Main.Instance().setScreen(new DavidMenuScreen());
+            }
+        });
+
+        // Postavitev vsebine
+        table.add(textTable).growX().padBottom(20).row();
+        table.add(imagesTable).padBottom(20).row();
+        table.add(backButton).center().width(200).height(50);
 
         return table;
     }
+
 }
