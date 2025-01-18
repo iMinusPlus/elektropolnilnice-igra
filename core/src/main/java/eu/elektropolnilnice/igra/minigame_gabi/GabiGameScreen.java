@@ -79,6 +79,7 @@ public class GabiGameScreen extends ScreenAdapter {
 
         font = new BitmapFont();
         font.getData().setScale(5f);
+        font.getColor().set(0f, 0f, 0f, 1f);
 
         elapsedTime = 0;
         laps = 0;
@@ -111,9 +112,9 @@ public class GabiGameScreen extends ScreenAdapter {
 
         if (raceCompleted) {
             font.draw(tiledMapRenderer.getBatch(), "Race Complete!", camera.viewportWidth / 2f - 50f, camera.viewportHeight / 2f);
-            font.draw(tiledMapRenderer.getBatch(), "Leaderboard:", camera.viewportWidth / 2f - 50f, camera.viewportHeight / 2f - 20f);
+            font.draw(tiledMapRenderer.getBatch(), "Leaderboard:", camera.viewportWidth / 2f - 50f, camera.viewportHeight / 2f - 150f);
             for (int i = 0; i < leaderboard.size(); i++) {
-                font.draw(tiledMapRenderer.getBatch(), (i + 1) + ". " + String.format("%.2f", leaderboard.get(i)), camera.viewportWidth / 2f - 50f, camera.viewportHeight / 2f - 40f - (i * 20));
+                font.draw(tiledMapRenderer.getBatch(), (i + 1) + ". " + String.format("%.2f", leaderboard.get(i)), camera.viewportWidth / 2f - 50f, camera.viewportHeight / 2f - 75f - (i * 20));
             }
         }
 
@@ -170,6 +171,10 @@ public class GabiGameScreen extends ScreenAdapter {
         }
 
         for (MapObject mapObject : finishLine) {
+            if (timeSinceFinish > 2f) {
+                hasCollided = false;
+                timeSinceFinish = 0f;
+            }
             if (hasCollided){
                 return;
             }
@@ -180,9 +185,8 @@ public class GabiGameScreen extends ScreenAdapter {
                         raceCompleted = true;
                         leaderboard.add(elapsedTime);
                         Collections.sort(leaderboard);
-
-                        hasCollided = true;
                     }
+                hasCollided = true;
             }
         }
     }
