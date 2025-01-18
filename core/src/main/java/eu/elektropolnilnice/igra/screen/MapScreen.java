@@ -7,6 +7,7 @@ import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.input.GestureDetector;
@@ -32,6 +33,9 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
     }
 
     private ShapeRenderer shapeRenderer;
+    private Texture markerTexture;
+    private Texture stationMarkerTexture;
+
     private Vector3 touchPosition;
 
     private TiledMap tiledMap;
@@ -50,6 +54,8 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
     @Override
     public void show() {
         shapeRenderer = new ShapeRenderer();
+//        markerTexture = new Texture(Gdx.files.internal("marker.png"));
+        stationMarkerTexture = new Texture(Gdx.files.internal("assets_raw/el_icon.png"));
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Constants.MAP_WIDTH, Constants.MAP_HEIGHT);
@@ -100,26 +106,40 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
         tiledMapRenderer.setView(camera);
         tiledMapRenderer.render();
 
-        drawMarkers();
+        drawMarkers(Main.Instance().getBatch());
     }
 
-    private void drawMarkers() {
+    private void drawMarkers(SpriteBatch batch) {
         Vector2 marker = MapRasterTiles.getPixelPosition(MARKER_GEOLOCATION.lat, MARKER_GEOLOCATION.lng, beginTile.x, beginTile.y);
 
         shapeRenderer.setProjectionMatrix(camera.combined);
-        shapeRenderer.setColor(Color.RED);
+        shapeRenderer.setColor(Color.BLUE);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         shapeRenderer.circle(marker.x, marker.y, 10);
         shapeRenderer.end();
 
+        batch.setProjectionMatrix(camera.combined);
+        batch.begin();
+
+        // Scale factor (e.g., 0.5 for 50% size)
+        float scale = 0.3f;
+
+        // Calculate new width and height
+        float scaledWidth = stationMarkerTexture.getWidth() * scale;
+        float scaledHeight = stationMarkerTexture.getHeight() * scale;
+
         for (Station station: Main.Instance().getStations()) {
             Vector2 m = MapRasterTiles.getPixelPosition(station.lattitude, station.longitude, beginTile.x, beginTile.y);
-            shapeRenderer.setProjectionMatrix(camera.combined);
-            shapeRenderer.setColor(Color.GREEN);
-            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-            shapeRenderer.circle(m.x, m.y, 15);
-            shapeRenderer.end();
+            // Center and draw the scaled texture
+            batch.draw(
+                stationMarkerTexture,
+                m.x - scaledWidth / 2f,
+                m.y - scaledHeight / 2f,
+                scaledWidth,
+                scaledHeight
+            );
         }
+        batch.end();
     }
 
     @Override
@@ -130,6 +150,8 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
     @Override
     public void dispose() {
         shapeRenderer.dispose();
+//        markerTexture.dispose();
+        stationMarkerTexture.dispose();
     }
 
     @Override
