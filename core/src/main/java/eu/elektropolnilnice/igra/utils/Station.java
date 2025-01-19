@@ -14,10 +14,19 @@ import java.net.URL;
 public class Station {
     public double lattitude;
     public double longitude;
+    public String title;
+    public String postcode;
+    public String country;
+    public String town;
 
-    public Station(double lattitude, double longitude) {
+
+    public Station(double lattitude, double longitude, String title, String postcode, String country, String town) {
         this.lattitude = lattitude;
         this.longitude = longitude;
+        this.title = title;
+        this.postcode = postcode;
+        this.country = country;
+        this.town = town;
     }
 
     public static Array<Station> getStations() throws IOException {
@@ -49,7 +58,14 @@ public class Station {
 
             // Loop through the data
             for (int i = 0; i < stations.length(); i++) {
-                stationsArray.add(new Station(stations.getJSONObject(i).getDouble("latitude"), stations.getJSONObject(i).getDouble("longitude")));
+                stationsArray.add(new Station(
+                    stations.getJSONObject(i).getDouble("latitude"),
+                    stations.getJSONObject(i).getDouble("longitude"),
+                    stations.getJSONObject(i).getString("title"),
+                    stations.getJSONObject(i).getString("postcode"),
+                    stations.getJSONObject(i).getString("country"),
+                    stations.getJSONObject(i).getString("town")
+                    ));
 //                stationsArray[i] = new Station(stations.getJSONObject(i).getDouble("latitude"), stations.getJSONObject(i).getDouble("longitude"));
                 System.out.println("Station: " + stations.getJSONObject(i).getDouble("latitude"));
             }
