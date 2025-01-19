@@ -77,7 +77,7 @@ public class MenuScreen extends ScreenAdapter {
         Table table = new Table();
         table.defaults().pad(20);
 
-        Image logo = new Image(new Texture("assets_raw/el_icon.png"));
+//        Image logo = new Image(new Texture("assets_raw/el_icon.png"));
 
         Table stationData = new Table();
 
@@ -92,6 +92,10 @@ public class MenuScreen extends ScreenAdapter {
             Label townLabel = new Label("Town: " + station.town, skin);
             Label latitudeLabel = new Label("Latitude: " + station.lattitude, skin);
             Label longitudeLabel = new Label("Longitude: " + station.longitude, skin);
+            Label usageCost = new Label("Cost: " + station.usageCost, skin);
+            Label usageType = new Label("Type: " + station.usageType, skin);
+            Label dateCreated = new Label("Created: " + station.dateCreated, skin);
+            Label dateAddedToOurApp = new Label("Added to app: " + station.dateAddedToOurApp, skin);
 
             okno.add(titleLabel).left().row();
             okno.add(postcodeLabel).left().row();
@@ -99,15 +103,19 @@ public class MenuScreen extends ScreenAdapter {
             okno.add(townLabel).left().row();
             okno.add(latitudeLabel).left().row();
             okno.add(longitudeLabel).left().row();
+            okno.add(usageCost).left().row();
+            okno.add(usageType).left().row();
+            okno.add(dateCreated).left().row();
+            okno.add(dateAddedToOurApp).left().row();
 
             stationData.add(okno).pad(20).row();
         }
 
 
-
-        TextButton playButtonDavid = new TextButton("David", skin);
-        TextButton playButtonFilip = new TextButton("Filip", skin);
-        TextButton playButtonGabi = new TextButton("Gabi", skin);
+        Label gamesLabel = new Label("Games to play ...", skin);
+        TextButton playButtonDavid = new TextButton("Drag racing", skin);
+        TextButton playButtonFilip = new TextButton("Wires game", skin);
+        TextButton playButtonGabi = new TextButton("Car racing", skin);
         TextButton backButton = new TextButton("Back", skin);
 
         playButtonDavid.addListener(new ClickListener() {
@@ -142,8 +150,9 @@ public class MenuScreen extends ScreenAdapter {
             }
         });
 
-        table.add(logo).center().colspan(3).row();
+//        table.add(logo).center().colspan(3).row();
         table.add(stationData).center().colspan(3).row();
+        table.add(gamesLabel).center().colspan(3).row();
         table.add(playButtonDavid).center().left();
         table.add(playButtonFilip).center().center();
         table.add(playButtonGabi).center().right().row();

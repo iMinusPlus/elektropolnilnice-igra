@@ -23,10 +23,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -34,6 +31,8 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import eu.elektropolnilnice.igra.GameConfig;
 import eu.elektropolnilnice.igra.Main;
+import eu.elektropolnilnice.igra.minigame_david.screen.DavidMenuScreen;
+import eu.elektropolnilnice.igra.minigame_gabi.GabiMenuScreen;
 import eu.elektropolnilnice.igra.utils.*;
 
 import java.io.IOException;
@@ -57,6 +56,9 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
     private Texture[] mapTiles;
     private ZoomXY beginTile;   // top left tile
 
+    private Viewport viewport;
+    private Stage stage;
+
     // center geolocation
     private final Geolocation CENTER_GEOLOCATION = new Geolocation(46.557314, 15.637771);
 
@@ -65,6 +67,9 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
 
     @Override
     public void show() {
+        viewport = new FitViewport(GameConfig.HUD_WIDTH, GameConfig.HUD_HEIGHT);
+        stage = new Stage(viewport, Main.Instance().getBatch());
+
         shapeRenderer = new ShapeRenderer();
 //        markerTexture = new Texture(Gdx.files.internal("marker.png"));
         stationMarkerTexture = new Texture(Gdx.files.internal("assets_raw/el_icon.png"));
@@ -108,8 +113,16 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
     }
 
     @Override
+    public void resize(int width, int height) {
+        viewport.update(width, height, true);
+    }
+
+    @Override
     public void render(float delta) {
         ScreenUtils.clear(0, 0, 0, 1);
+
+        stage.act(delta);
+        stage.draw();
 
         handleInput();
 
@@ -164,6 +177,7 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
         shapeRenderer.dispose();
 //        markerTexture.dispose();
         stationMarkerTexture.dispose();
+        stage.dispose();
     }
 
     @Override
@@ -197,6 +211,7 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
             // klik je uspesen, ce je razdalja manjsa od praga
             if (distance < 15) { // prag v pikslih
                 Main.Instance().setScreen(new MenuScreen(station));
+//                showStationInfoDialog(station);
                 Gdx.app.log("Marker Tapped", "Location: " + station.lattitude + ", " + station.longitude);
                 return true;
             }
@@ -276,5 +291,33 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
         camera.position.x = MathUtils.clamp(camera.position.x, effectiveViewportWidth / 2f, Constants.MAP_WIDTH - effectiveViewportWidth / 2f);
         camera.position.y = MathUtils.clamp(camera.position.y, effectiveViewportHeight / 2f, Constants.MAP_HEIGHT - effectiveViewportHeight / 2f);
     }
+
+//    private void showStationInfoDialog(Station station) {
+////        Gdx.input.setInputProcessor(stage);
+//        // Ustvarimo dialog
+//        Dialog stationInfoDialog = new Dialog("Station Info", Main.Instance().getSkin()) {
+//            @Override
+//            protected void result(Object object) {
+//                // Preverimo rezultat (če potrebujemo npr. potrditev)
+//                Gdx.app.log("Dialog", "Closed with result: " + object);
+//            }
+//        };
+//
+//        // Nastavimo vsebino dialoga
+//        stationInfoDialog.text(
+//            "Title: " + station.title + "\n" +
+//                "Latitude: " + station.lattitude + "\n" +
+//                "Longitude: " + station.longitude + "\n" +
+//                "Town: " + (station.town != null ? station.town : "Unknown") + "\n" +
+//                "Postcode: " + station.postcode + "\n" +
+//                "Country: " + station.country
+//        );
+//
+//        // Dodamo gumbe
+//        stationInfoDialog.button("OK", true); // Gumb za zapiranje
+//
+//        // Prikaz dialoga
+//        stationInfoDialog.show(stage);
+//    }
 
 }

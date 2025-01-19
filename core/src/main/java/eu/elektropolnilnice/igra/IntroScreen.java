@@ -14,6 +14,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
+import eu.elektropolnilnice.igra.screen.MapScreen;
 import eu.elektropolnilnice.igra.screen.MenuScreen;
 
 public class IntroScreen extends ScreenAdapter {
@@ -63,7 +64,7 @@ public class IntroScreen extends ScreenAdapter {
 
         // Go to the MenuScreen after INTRO_DURATION_IN_SEC seconds
         if (duration > INTRO_DURATION_IN_SEC) {
-             game.setScreen(new MenuScreen());
+             game.setScreen(new MapScreen());
         }
 
         stage.act(delta);
