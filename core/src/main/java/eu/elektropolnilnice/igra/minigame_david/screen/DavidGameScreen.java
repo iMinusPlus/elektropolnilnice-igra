@@ -20,6 +20,7 @@ import eu.elektropolnilnice.igra.Main;
 import eu.elektropolnilnice.igra.assets.AssetDescriptors;
 import eu.elektropolnilnice.igra.assets.RegionNames;
 import eu.elektropolnilnice.igra.minigame_david.object.Car;
+import eu.elektropolnilnice.igra.minigame_david.object.Player;
 
 public class DavidGameScreen extends ScreenAdapter {
 
@@ -30,7 +31,6 @@ public class DavidGameScreen extends ScreenAdapter {
     private Stage stage;
     private Skin skin;
     private TextureAtlas gameplay;
-    private TextureAtlas cars;
 
     private float backgroundX;
     private static float BACKGROUND_SPEED = 0f;
@@ -43,11 +43,16 @@ public class DavidGameScreen extends ScreenAdapter {
     Label labelPlayer1;
     Label labelPlayer2;
 
+    Player player1;
+    Player player2;
+
     private boolean gameover = false;
 
-    public DavidGameScreen() {
+    public DavidGameScreen(Player player1, Player player2) {
         assetManager = Main.Instance().getAssetManager();
         batch = Main.Instance().getBatch();
+        this.player1 = player1;
+        this.player2 = player2;
     }
 
     @Override
@@ -62,10 +67,9 @@ public class DavidGameScreen extends ScreenAdapter {
 
         skin = assetManager.get(AssetDescriptors.UI_SKIN);
         gameplay = assetManager.get(AssetDescriptors.DAVID_GAMEPLAY);
-        cars = assetManager.get(AssetDescriptors.DAVID_CARS);
 
-        player1Car = new Car("Player 1", 50f, 300f, 50f, cars.findRegion(RegionNames.CAR_1));
-        player2Car = new Car("Player 2", 50f, 550f, 50f, cars.findRegion(RegionNames.CAR_2));
+        player1Car = player1.getCar();
+        player2Car = player2.getCar();
 
         stage.addActor(speedometersUI());
         stage.addActor(bottomNavigationUI());
@@ -86,20 +90,20 @@ public class DavidGameScreen extends ScreenAdapter {
         }
 
         if (gameover) {
-            // Ustavitev ozadja
+            // ustavitev ozadja
             BACKGROUND_SPEED = 0f;
 
-            // Premik avtov izven okna
+            // premik avtov izven okna
             player1Car.setX(player1Car.getX() + player1Car.getSpeed() * Gdx.graphics.getDeltaTime());
             player2Car.setX(player2Car.getX() + player2Car.getSpeed() * Gdx.graphics.getDeltaTime());
 
-            // Premik ozadja
+            // premik ozadja
             backgroundX -= BACKGROUND_SPEED * delta;
             if (backgroundX <= -gameplay.findRegion(RegionNames.BACKGROUND).getRegionWidth()) {
-                backgroundX = 0; // Ponovi ozadje
+                backgroundX = 0;
             }
 
-            // Prikaži modalno okno samo, če še ni bilo prikazano
+            // prikazi modalno okno ce se ni bilo prikazano
             if (stage.getRoot().findActor("gameoverDialog") == null) {
                 showGameOverDialog();
             }
@@ -187,35 +191,40 @@ public class DavidGameScreen extends ScreenAdapter {
     }
 
     private Table speedometersUI() {
-        // Glavna tabela
         Table table = new Table();
         table.setFillParent(true);
         table.bottom().pad(20);
 
-        // Ustvarimo slike za števce
         Image speedometerLeft = new Image(gameplay.findRegion(RegionNames.SPEEDOMETER));
         Image speedometerRight = new Image(gameplay.findRegion(RegionNames.SPEEDOMETER));
 
-        // Ustvarimo besedili za števce
         labelPlayer1 = new Label("0", skin, "david");
         labelPlayer2 = new Label("0", skin, "david");
 
         labelPlayer1.setAlignment(Align.center);
         labelPlayer2.setAlignment(Align.center);
 
-        // Uporabimo Stack za levega igralca
+        Label player1Name = new Label(player1.getName(), skin, "david-black");
+        Label player2Name = new Label(player2.getName(), skin, "david-black");
+
         Stack leftStack = new Stack();
-        leftStack.add(speedometerLeft); // Dodamo sliko števca
-        leftStack.add(labelPlayer1);   // Dodamo besedilo na sredino slike
+        leftStack.add(speedometerLeft);
+        leftStack.add(labelPlayer1);
 
-        // Uporabimo Stack za desnega igralca
         Stack rightStack = new Stack();
-        rightStack.add(speedometerRight); // Dodamo sliko števca
-        rightStack.add(labelPlayer2);     // Dodamo besedilo na sredino slike
+        rightStack.add(speedometerRight);
+        rightStack.add(labelPlayer2);
 
-        // Dodamo Stack elemente v glavno tabelo
-        table.add(leftStack).expandX().left().padRight(50).width(200).height(200); // Leva stran
-        table.add(rightStack).expandX().right().padLeft(50).width(200).height(200); // Desna stran
+        Table leftTable = new Table();
+        leftTable.add(player1Name).center().padBottom(10).row();
+        leftTable.add(leftStack).width(200).height(200);
+
+        Table rightTable = new Table();
+        rightTable.add(player2Name).center().padBottom(10).row();
+        rightTable.add(rightStack).width(200).height(200);
+
+        table.add(leftTable).expandX().left().padRight(50).width(200).height(200);
+        table.add(rightTable).expandX().right().padLeft(50).width(200).height(200);
 
         return table;
     }
@@ -260,12 +269,12 @@ public class DavidGameScreen extends ScreenAdapter {
 
         if (leadCar == player1Car) {
             winnerTexture = player1Car.getTexture();
-            winnerText = player1Car.getName() + " is the Winner!";
+            winnerText = player1.getName() + " is the Winner!";
         } else if (leadCar == player2Car) {
             winnerTexture = player2Car.getTexture();
-            winnerText = player2Car.getName() + " is the Winner!";
+            winnerText = player2.getName() + " is the Winner!";
         } else {
-            winnerTexture = gameplay.findRegion(RegionNames.CAR_1);
+            winnerTexture = gameplay.findRegion(RegionNames.LOGO_1);
             winnerText = "It's a TIE!";
         }
 
@@ -273,11 +282,10 @@ public class DavidGameScreen extends ScreenAdapter {
         contentTable.defaults().pad(20);
 
         Image winnerImage = new Image(winnerTexture);
-        contentTable.add(winnerImage).center().size(200, 100);
+        contentTable.add(winnerImage).center();
         contentTable.row();
 
         Label winnerLabel = new Label(winnerText, skin, "david");
-//        winnerLabel.setFontScale(1.5f);
         contentTable.add(winnerLabel).center();
 
         gameOverDialog.getContentTable().add(contentTable).center();
