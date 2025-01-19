@@ -46,10 +46,17 @@ public class GabiGameScreen extends ScreenAdapter {
     private boolean raceCompleted;
 
     float timeSinceFinish = 0f;
+    float timeSinceCollision = 0f;
 
     private List<Float> leaderboard;
 
     Boolean hasCollided = false;
+
+    // Dynamic speed variables
+    private float playerSpeed = 700f;  // Initial speed
+    private float maxSpeed = 1000f;    // Maximum speed the player can reach
+    private float accelerationRate = 150f; // How fast the player speeds up
+    private float decelerationRate = 40f; // How fast the player slows down after a collision
 
     @Override
     public void show() {
@@ -94,6 +101,7 @@ public class GabiGameScreen extends ScreenAdapter {
 
         float deltaTime = Gdx.graphics.getDeltaTime();
         timeSinceFinish += deltaTime;
+        timeSinceCollision += deltaTime;
 
         if (!raceCompleted) {
             elapsedTime += delta;
@@ -117,14 +125,16 @@ public class GabiGameScreen extends ScreenAdapter {
                 font.draw(tiledMapRenderer.getBatch(), (i + 1) + ". " + String.format("%.2f", leaderboard.get(i)), camera.viewportWidth / 2f - 50f, camera.viewportHeight / 2f - 75f - (i * 20));
             }
         }
+        if (timeSinceCollision > 2f){
+            playerSpeed = Math.min((playerSpeed + accelerationRate * delta), maxSpeed);
+        }
 
         tiledMapRenderer.getBatch().end();
     }
 
     private void handleGameplayInput(float delta) {
-        float speed = 700f; // Movement speed in pixels per second
-        float rotationSpeed = 200f; // Rotation speed in degrees per second
-
+        // Gradually increase the speed over time
+        playerSpeed = Math.min(playerSpeed + accelerationRate * delta, maxSpeed);
 
         // Movement deltas
         float dx = 0;
@@ -132,22 +142,22 @@ public class GabiGameScreen extends ScreenAdapter {
 
         // Forward movement (W key)
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-            dx += (float) Math.cos(Math.toRadians(player.getRotation())) * speed * delta;
-            dy += (float) Math.sin(Math.toRadians(player.getRotation())) * speed * delta;
+            dx += (float) Math.cos(Math.toRadians(player.getRotation())) * playerSpeed * delta;
+            dy += (float) Math.sin(Math.toRadians(player.getRotation())) * playerSpeed * delta;
         }
 
         // Backward movement (S key)
         if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-            dx -= (float) Math.cos(Math.toRadians(player.getRotation())) * speed * delta;
-            dy -= (float) Math.sin(Math.toRadians(player.getRotation())) * speed * delta;
+            dx -= (float) Math.cos(Math.toRadians(player.getRotation())) * playerSpeed * delta;
+            dy -= (float) Math.sin(Math.toRadians(player.getRotation())) * playerSpeed * delta;
         }
 
         // Rotation (A and D keys)
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-            player.rotate(rotationSpeed * delta); // Rotate counterclockwise
+            player.rotate(200f * delta); // Rotation speed
         }
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-            player.rotate(-rotationSpeed * delta); // Rotate clockwise
+            player.rotate(-200f * delta); // Rotation speed
         }
 
         // Calculate the next position
@@ -163,10 +173,9 @@ public class GabiGameScreen extends ScreenAdapter {
     private void checkCollisions() {
         for (MapObject mapObject : blockersObj) {
             if (player.getBoundingRectangle().overlaps(((RectangleMapObject) mapObject).getRectangle())) {
-                // Bump back to road
-                float roadX = Math.max(0, Math.min(player.getX(), mapWidthInPx - player.getWidth()));
-                float roadY = Math.max(0, Math.min(player.getY(), mapHeightInPx - player.getHeight()));
-                player.setPosition(roadX, roadY);
+                // Collision with barrier - slow down the player
+                playerSpeed = Math.max(playerSpeed - decelerationRate, 200f); // Don't go below 200 speed
+                timeSinceCollision = 0f;
             }
         }
 
@@ -175,17 +184,17 @@ public class GabiGameScreen extends ScreenAdapter {
                 hasCollided = false;
                 timeSinceFinish = 0f;
             }
-            if (hasCollided){
+            if (hasCollided) {
                 return;
             }
 
             if (player.getBoundingRectangle().overlaps(((RectangleMapObject) mapObject).getRectangle())) {
-                    laps++;
-                    if (laps >= 3) {
-                        raceCompleted = true;
-                        leaderboard.add(elapsedTime);
-                        Collections.sort(leaderboard);
-                    }
+                laps++;
+                if (laps >= 3) {
+                    raceCompleted = true;
+                    leaderboard.add(elapsedTime);
+                    Collections.sort(leaderboard);
+                }
                 hasCollided = true;
             }
         }
