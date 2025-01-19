@@ -1,17 +1,10 @@
 package eu.elektropolnilnice.igra;
 
-import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Game;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.ScreenUtils;
 import eu.elektropolnilnice.igra.assets.AssetDescriptors;
-import eu.elektropolnilnice.igra.screen.MenuScreen;
 import eu.elektropolnilnice.igra.utils.Station;
 
 import java.io.IOException;
@@ -56,7 +49,7 @@ public class Main extends Game {
         }
 
         //TODO: make intro screen mby
-        setScreen(new MenuScreen());
+        setScreen(new IntroScreen(this));
     }
 
     @Override
