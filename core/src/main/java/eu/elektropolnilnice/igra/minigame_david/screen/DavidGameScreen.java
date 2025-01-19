@@ -86,31 +86,25 @@ public class DavidGameScreen extends ScreenAdapter {
         }
 
         if (gameover) {
-            // dolocimo zmagovalca in izpis
-            if (leadCar == player1Car) {
-                labelPlayer1.setText(player1Car.getName() + ": 1. place");
-                labelPlayer2.setText(player2Car.getName() + ": 2. place");
-            } else if (leadCar == player2Car) {
-                labelPlayer2.setText(player2Car.getName() + ": 1. place");
-                labelPlayer1.setText(player1Car.getName() + ": 2. place");
-            } else {
-                labelPlayer2.setText("TIE");
-                labelPlayer1.setText("TIE");
-            }
-
+            // Ustavitev ozadja
             BACKGROUND_SPEED = 0f;
 
-            // premik avtov preko okna
+            // Premik avtov izven okna
             player1Car.setX(player1Car.getX() + player1Car.getSpeed() * Gdx.graphics.getDeltaTime());
             player2Car.setX(player2Car.getX() + player2Car.getSpeed() * Gdx.graphics.getDeltaTime());
 
-            // premik ozadja
+            // Premik ozadja
             backgroundX -= BACKGROUND_SPEED * delta;
             if (backgroundX <= -gameplay.findRegion(RegionNames.BACKGROUND).getRegionWidth()) {
                 backgroundX = 0; // Ponovi ozadje
             }
 
-        }else {
+            // Prikaži modalno okno samo, če še ni bilo prikazano
+            if (stage.getRoot().findActor("gameoverDialog") == null) {
+                showGameOverDialog();
+            }
+        }
+        else {
             player1Car.update(delta, Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.RIGHT));
             player2Car.update(delta, Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.D));
 
@@ -220,8 +214,8 @@ public class DavidGameScreen extends ScreenAdapter {
         rightStack.add(labelPlayer2);     // Dodamo besedilo na sredino slike
 
         // Dodamo Stack elemente v glavno tabelo
-        table.add(leftStack).expandX().left().padRight(50).width(150).height(150); // Leva stran
-        table.add(rightStack).expandX().right().padLeft(50).width(150).height(150); // Desna stran
+        table.add(leftStack).expandX().left().padRight(50).width(200).height(200); // Leva stran
+        table.add(rightStack).expandX().right().padLeft(50).width(200).height(200); // Desna stran
 
         return table;
     }
@@ -247,6 +241,60 @@ public class DavidGameScreen extends ScreenAdapter {
         stage.addActor(table);
 
         return table;
+    }
+
+    private void showGameOverDialog() {
+        Dialog gameOverDialog = new Dialog("", skin, "david") {
+            @Override
+            protected void result(Object object) {
+                if ((boolean) object) {
+                    Main.Instance().setScreen(new DavidMenuScreen());
+                }
+            }
+        };
+
+        gameOverDialog.setMovable(false);
+
+        TextureAtlas.AtlasRegion winnerTexture;
+        String winnerText;
+
+        if (leadCar == player1Car) {
+            winnerTexture = player1Car.getTexture();
+            winnerText = player1Car.getName() + " is the Winner!";
+        } else if (leadCar == player2Car) {
+            winnerTexture = player2Car.getTexture();
+            winnerText = player2Car.getName() + " is the Winner!";
+        } else {
+            winnerTexture = gameplay.findRegion(RegionNames.CAR_1);
+            winnerText = "It's a TIE!";
+        }
+
+        Table contentTable = new Table();
+        contentTable.defaults().pad(20);
+
+        Image winnerImage = new Image(winnerTexture);
+        contentTable.add(winnerImage).center().size(200, 100);
+        contentTable.row();
+
+        Label winnerLabel = new Label(winnerText, skin, "david");
+//        winnerLabel.setFontScale(1.5f);
+        contentTable.add(winnerLabel).center();
+
+        gameOverDialog.getContentTable().add(contentTable).center();
+        gameOverDialog.getContentTable().row();
+
+        TextButton okButton = new TextButton("OK", skin, "david");
+        gameOverDialog.button(okButton, true).pad(20);
+
+        gameOverDialog.setSize(600, 400);
+        gameOverDialog.setPosition(
+            (GameConfig.HUD_WIDTH - gameOverDialog.getWidth()) / 2,
+            (GameConfig.HUD_HEIGHT - gameOverDialog.getHeight()) / 2
+        );
+
+        gameOverDialog.setName("gameoverDialog");
+
+        gameOverDialog.show(stage);
     }
 }
 

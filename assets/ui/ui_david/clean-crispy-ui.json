@@ -371,8 +371,12 @@ com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
 		fontColor: color
 	}
     david: {
-      font: font-airstrike32,
+      font: font-airstrike32
       fontColor: color
+    }
+    david-black: {
+      font: font-airstrike32
+      fontColor: white
     }
 }
 com.badlogic.gdx.scenes.scene2d.ui.List$ListStyle: {
@@ -519,5 +523,10 @@ com.badlogic.gdx.scenes.scene2d.ui.Window$WindowStyle: {
 		titleFont: font
 		titleFontColor: color
 	}
+    david: {
+      background: content-background
+      titleFont: font-airstrike32
+      titleFontColor: white
+    }
 }
 }
