@@ -20,6 +20,7 @@ import eu.elektropolnilnice.igra.assets.AssetDescriptors;
 import eu.elektropolnilnice.igra.assets.RegionNames;
 import eu.elektropolnilnice.igra.minigame_david.object.Car;
 import eu.elektropolnilnice.igra.minigame_david.object.Player;
+import eu.elektropolnilnice.igra.screen.MenuScreen;
 
 public class DavidMenuScreen extends ScreenAdapter {
 
@@ -99,6 +100,7 @@ public class DavidMenuScreen extends ScreenAdapter {
         Image logo = new Image(gameplay.findRegion(RegionNames.LOGO_1));
         TextButton playButton = new TextButton("PLAY", skin, "david");
         TextButton howToPlayButton = new TextButton("HOW TO PLAY", skin, "david");
+        TextButton backButton = new TextButton("BACK", skin, "david");
 
         playButton.addListener(new ClickListener() {
             @Override
@@ -124,11 +126,20 @@ public class DavidMenuScreen extends ScreenAdapter {
             }
         });
 
+        backButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Main.Instance().setScreen(new MenuScreen());
+            }
+        });
+
         table.add(logo).center().padBottom(50);
         table.row();
         table.add(playButton).center().width(270).height(50);
         table.row();
         table.add(howToPlayButton).center().width(270).height(50);
+        table.row();
+        table.add(backButton).center().width(270).height(50);
         table.center();
         table.setFillParent(true);
 
@@ -163,13 +174,18 @@ public class DavidMenuScreen extends ScreenAdapter {
         TextureAtlas.AtlasRegion leftImage = allCars.get(leftCarIndex[0]);
         TextureAtlas.AtlasRegion rightImage = allCars.get(rightCarIndex[0]);
 
-        TextField leftTextField = new TextField("Player 1", skin);
-        TextButton leftButton1 = new TextButton("Next", skin);
-        TextButton leftButton2 = new TextButton("Prev", skin);
+        TextField leftTextField = new TextField("Player 1", skin, "david");
+        TextButton leftButton1 = new TextButton("", skin);
+        leftButton1.add(new Image(gameplay.findRegion(RegionNames.PREV_ICON))).size(40, 40);
+        TextButton leftButton2 = new TextButton("", skin);
+        leftButton2.add(new Image(gameplay.findRegion(RegionNames.NEXT_ICON))).size(40, 40);
 
-        TextField rightTextField = new TextField("Player 2", skin);
-        TextButton rightButton1 = new TextButton("Next", skin);
-        TextButton rightButton2 = new TextButton("Prev", skin);
+        TextField rightTextField = new TextField("Player 2", skin, "david");
+        TextButton rightButton1 = new TextButton("", skin);
+        rightButton1.add(new Image(gameplay.findRegion(RegionNames.PREV_ICON))).size(40, 40);
+        TextButton rightButton2 = new TextButton("", skin);
+        rightButton2.add(new Image(gameplay.findRegion(RegionNames.NEXT_ICON))).size(40, 40);
+
 
         Table leftContainer = new Table(skin);
         leftContainer.setBackground("content-background");

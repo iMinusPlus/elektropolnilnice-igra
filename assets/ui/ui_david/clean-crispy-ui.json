@@ -493,6 +493,13 @@ com.badlogic.gdx.scenes.scene2d.ui.TextField$TextFieldStyle: {
 		cursor: cursor-c
 		selection: selection
 	}
+    david: {
+      font: font-airstrike32
+      fontColor: white
+      background: textfield-c
+      cursor: cursor-c
+      selection: selection
+    }
 }
 com.badlogic.gdx.scenes.scene2d.ui.TextTooltip$TextTooltipStyle: {
 	default: {

@@ -91,11 +91,11 @@ public class DavidHelpScreen extends ScreenAdapter {
         textTable.pad(20);
 
         Label instructions = new Label(
-            "Navodila za igro:\n\n" +
-                "Igra je namenjena dvema igralcema. Cilj igre je cim hitreje doseci hitrost 100 km/h.\n\n" +
-                "1. Igralec 1 uporablja tipki LEFT in RIGHT.\n" +
-                "2. Igralec 2 uporablja tipki A in D.\n\n" +
-                "Ce igralec preneha pritiskati, se hitrost zacne zmanjsevati. Zmaga tisti, ki prvi doseze 100 km/h!",
+            "Game Instructions:\n\n" +
+                "This game is designed for two players. The goal is to reach a speed of 100 km/h as quickly as possible.\n\n" +
+                "1. Player 1 uses the LEFT and RIGHT keys.\n" +
+                "2. Player 2 uses the A and D keys.\n\n" +
+                "If a player stops pressing the keys, their speed will start to decrease. The winner is the first to reach 100 km/h!",
             skin, "david"
         );
         instructions.setWrap(true);

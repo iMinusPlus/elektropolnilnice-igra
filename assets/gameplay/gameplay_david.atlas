@@ -4,6 +4,20 @@ size: 4096, 1024
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
+angle-left
+  rotate: false
+  xy: 3101, 731
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+angle-right
+  rotate: false
+  xy: 2669, 49
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
 audiNumbers
   rotate: false
   xy: 2669, 431

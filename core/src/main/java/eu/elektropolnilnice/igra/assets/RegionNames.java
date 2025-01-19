@@ -6,8 +6,8 @@ public class RegionNames {
     public static final String MENU_BACKGROUND = "menuBackground";
     public static final String BACKGROUND = "background";
     public static final String LOGO_1 = "logo_1";
-    public static final String LOGO_2 = "logo_2";
-    public static final String LOGO_3 = "carracing_logo";
+    public static final String NEXT_ICON = "angle-right";
+    public static final String PREV_ICON = "angle-left";
     public static final String SPEEDOMETER = "audiNumbers";
 
     // cars_david.atlas
