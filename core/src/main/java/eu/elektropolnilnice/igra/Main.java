@@ -3,8 +3,11 @@ package eu.elektropolnilnice.igra;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import eu.elektropolnilnice.igra.assets.AssetDescriptors;
 import eu.elektropolnilnice.igra.utils.Station;
 
@@ -96,4 +99,6 @@ public class Main extends Game {
         return stations;
     }
     public Skin getSkin() {return assetManager.get(AssetDescriptors.UI_SKIN);}
+
+
 }

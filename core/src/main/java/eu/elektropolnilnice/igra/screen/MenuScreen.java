@@ -4,13 +4,11 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -20,6 +18,7 @@ import eu.elektropolnilnice.igra.Main;
 import eu.elektropolnilnice.igra.assets.AssetDescriptors;
 import eu.elektropolnilnice.igra.minigame_david.screen.DavidMenuScreen;
 import eu.elektropolnilnice.igra.minigame_gabi.GabiMenuScreen;
+import eu.elektropolnilnice.igra.utils.Station;
 
 public class MenuScreen extends ScreenAdapter {
 
@@ -29,9 +28,13 @@ public class MenuScreen extends ScreenAdapter {
     private Stage stage;
     private Skin skin;
 
-    public MenuScreen() {
+    private Station station;
+
+    public MenuScreen(Station station) {
         this.assetManager = Main.Instance().getAssetManager();
+        this.station = station;
     }
+    public MenuScreen() { this.assetManager = Main.Instance().getAssetManager(); }
 
     @Override
     public void show() {
@@ -74,7 +77,34 @@ public class MenuScreen extends ScreenAdapter {
         Table table = new Table();
         table.defaults().pad(20);
 
-        Label title = new Label("MINIGAMEs", skin);
+        Image logo = new Image(new Texture("assets_raw/el_icon.png"));
+
+        Table stationData = new Table();
+
+        if (station != null) {
+            Window okno = new Window(station.title, skin);
+            okno.defaults().pad(10);
+
+            // Dodajamo podatke o polnilnici v okno
+            Label titleLabel = new Label("Title: " + station.title, skin);
+            Label postcodeLabel = new Label("Postcode: " + station.postcode, skin);
+            Label countryLabel = new Label("Country: " + station.country, skin);
+            Label townLabel = new Label("Town: " + station.town, skin);
+            Label latitudeLabel = new Label("Latitude: " + station.lattitude, skin);
+            Label longitudeLabel = new Label("Longitude: " + station.longitude, skin);
+
+            okno.add(titleLabel).left().row();
+            okno.add(postcodeLabel).left().row();
+            okno.add(countryLabel).left().row();
+            okno.add(townLabel).left().row();
+            okno.add(latitudeLabel).left().row();
+            okno.add(longitudeLabel).left().row();
+
+            stationData.add(okno).pad(20).row();
+        }
+
+
+
         TextButton playButtonDavid = new TextButton("David", skin);
         TextButton playButtonFilip = new TextButton("Filip", skin);
         TextButton playButtonGabi = new TextButton("Gabi", skin);
@@ -112,12 +142,12 @@ public class MenuScreen extends ScreenAdapter {
             }
         });
 
-        table.add(title).center();
-        table.row();
-        table.add(playButtonDavid).center().row();
-        table.add(playButtonFilip).center().row();
-        table.add(playButtonGabi).center().row();
-        table.add(backButton).center().row();
+        table.add(logo).center().colspan(3).row();
+        table.add(stationData).center().colspan(3).row();
+        table.add(playButtonDavid).center().left();
+        table.add(playButtonFilip).center().center();
+        table.add(playButtonGabi).center().right().row();
+        table.add(backButton).center().colspan(3).row();
         table.center();
         table.setFillParent(true);
 

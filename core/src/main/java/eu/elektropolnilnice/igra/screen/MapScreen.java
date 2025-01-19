@@ -20,10 +20,17 @@ import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import eu.elektropolnilnice.igra.GameConfig;
 import eu.elektropolnilnice.igra.Main;
@@ -40,9 +47,6 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
     private ShapeRenderer shapeRenderer;
     private Texture markerTexture;
     private Texture stationMarkerTexture;
-
-    private Viewport viewport;
-    private Stage stage;
 
     private Vector3 touchPosition;
 
@@ -64,9 +68,6 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
         shapeRenderer = new ShapeRenderer();
 //        markerTexture = new Texture(Gdx.files.internal("marker.png"));
         stationMarkerTexture = new Texture(Gdx.files.internal("assets_raw/el_icon.png"));
-
-        viewport = new FitViewport(GameConfig.HUD_WIDTH, GameConfig.HUD_HEIGHT);
-        stage = new Stage(viewport, Main.Instance().getBatch());
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Constants.MAP_WIDTH, Constants.MAP_HEIGHT);
@@ -195,7 +196,7 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
 
             // klik je uspesen, ce je razdalja manjsa od praga
             if (distance < 15) { // prag v pikslih
-                showStationInfoDialog(station);
+                Main.Instance().setScreen(new MenuScreen(station));
                 Gdx.app.log("Marker Tapped", "Location: " + station.lattitude + ", " + station.longitude);
                 return true;
             }
@@ -275,33 +276,5 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
         camera.position.x = MathUtils.clamp(camera.position.x, effectiveViewportWidth / 2f, Constants.MAP_WIDTH - effectiveViewportWidth / 2f);
         camera.position.y = MathUtils.clamp(camera.position.y, effectiveViewportHeight / 2f, Constants.MAP_HEIGHT - effectiveViewportHeight / 2f);
     }
-
-    private void showStationInfoDialog(Station station) {
-        // Ustvarimo dialog
-        Dialog stationInfoDialog = new Dialog("Station Info", Main.Instance().getSkin()) {
-            @Override
-            protected void result(Object object) {
-                // Preverimo rezultat (če potrebujemo npr. potrditev)
-                Gdx.app.log("Dialog", "Closed with result: " + object);
-            }
-        };
-
-        // Nastavimo vsebino dialoga
-        stationInfoDialog.text(
-            "Title: " + station.title + "\n" +
-                "Latitude: " + station.lattitude + "\n" +
-                "Longitude: " + station.longitude + "\n" +
-                "Town: " + (station.town != null ? station.town : "Unknown") + "\n" +
-                "Postcode: " + station.postcode + "\n" +
-                "Country: " + station.country
-        );
-
-        // Dodamo gumbe
-        stationInfoDialog.button("OK", true); // Gumb za zapiranje
-
-        // Prikaz dialoga
-        stationInfoDialog.show(stage);
-    }
-
 
 }
