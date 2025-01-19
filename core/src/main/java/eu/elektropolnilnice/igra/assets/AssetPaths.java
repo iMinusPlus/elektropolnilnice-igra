@@ -17,5 +17,6 @@ public class AssetPaths {
 
     public static class GAMEPLAY {
             public static final String DAVID_GAMEPLAY = "gameplay/gameplay_david.atlas";
+            public static final String DAVID_CARS = "gameplay/cars_david.atlas";
     }
 }

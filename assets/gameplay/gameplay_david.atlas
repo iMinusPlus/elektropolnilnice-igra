@@ -4,6 +4,13 @@ size: 4096, 1024
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
+audiNumbers
+  rotate: false
+  xy: 2669, 431
+  size: 430, 428
+  orig: 430, 428
+  offset: 0, 0
+  index: -1
 background
   rotate: false
   xy: 1387, 22
@@ -13,7 +20,7 @@ background
   index: -1
 carracing_logo
   rotate: false
-  xy: 2669, 730
+  xy: 2669, 300
   size: 696, 129
   orig: 696, 129
   offset: 0, 0
@@ -27,7 +34,7 @@ logo_1
   index: -1
 logo_2
   rotate: false
-  xy: 2669, 609
+  xy: 2669, 179
   size: 682, 119
   orig: 682, 119
   offset: 0, 0
@@ -37,19 +44,5 @@ menuBackground
   xy: 2, 2
   size: 1383, 980
   orig: 1383, 980
-  offset: 0, 0
-  index: -1
-spr_turbo_0
-  rotate: false
-  xy: 3495, 865
-  size: 288, 117
-  orig: 288, 117
-  offset: 0, 0
-  index: -1
-spr_vintage_0
-  rotate: false
-  xy: 2669, 490
-  size: 288, 117
-  orig: 288, 117
   offset: 0, 0
   index: -1

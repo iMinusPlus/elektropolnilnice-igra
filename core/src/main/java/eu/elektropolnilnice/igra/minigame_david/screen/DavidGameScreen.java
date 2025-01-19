@@ -7,11 +7,11 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -30,6 +30,7 @@ public class DavidGameScreen extends ScreenAdapter {
     private Stage stage;
     private Skin skin;
     private TextureAtlas gameplay;
+    private TextureAtlas cars;
 
     private float backgroundX;
     private static float BACKGROUND_SPEED = 0f;
@@ -56,15 +57,18 @@ public class DavidGameScreen extends ScreenAdapter {
 
         assetManager.load(AssetDescriptors.UI_SKIN);
         assetManager.load(AssetDescriptors.DAVID_GAMEPLAY);
+        assetManager.load(AssetDescriptors.DAVID_CARS);
         assetManager.finishLoading();
 
         skin = assetManager.get(AssetDescriptors.UI_SKIN);
         gameplay = assetManager.get(AssetDescriptors.DAVID_GAMEPLAY);
+        cars = assetManager.get(AssetDescriptors.DAVID_CARS);
 
-        player1Car = new Car("Player 1", 50f, 300f, 50f, gameplay.findRegion(RegionNames.CAR_1));
-        player2Car = new Car("Player 2", 50f, 550f, 50f, gameplay.findRegion(RegionNames.CAR_2));
+        player1Car = new Car("Player 1", 50f, 300f, 50f, cars.findRegion(RegionNames.CAR_1));
+        player2Car = new Car("Player 2", 50f, 550f, 50f, cars.findRegion(RegionNames.CAR_2));
 
-        stage.addActor(bottomNavigation());
+        stage.addActor(speedometersUI());
+        stage.addActor(bottomNavigationUI());
         Gdx.input.setInputProcessor(stage);
     }
 
@@ -110,8 +114,8 @@ public class DavidGameScreen extends ScreenAdapter {
             player1Car.update(delta, Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.RIGHT));
             player2Car.update(delta, Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.D));
 
-            labelPlayer1.setText("Player 1 Speed: " + (int) player1Car.getSpeed()/10 + "km/h");
-            labelPlayer2.setText("Player 2 Speed: " + (int) player2Car.getSpeed()/10 + "km/h");
+            labelPlayer1.setText((int) player1Car.getSpeed()/10);
+            labelPlayer2.setText((int) player2Car.getSpeed()/10);
 
             // dolocanje hitrosti ozadja na podlagi hitrejsega avtomobila
             BACKGROUND_SPEED = Math.max(player1Car.getSpeed(), player2Car.getSpeed());
@@ -188,7 +192,42 @@ public class DavidGameScreen extends ScreenAdapter {
         stage.dispose();
     }
 
-    private Table bottomNavigation() {
+    private Table speedometersUI() {
+        // Glavna tabela
+        Table table = new Table();
+        table.setFillParent(true);
+        table.bottom().pad(20);
+
+        // Ustvarimo slike za števce
+        Image speedometerLeft = new Image(gameplay.findRegion(RegionNames.SPEEDOMETER));
+        Image speedometerRight = new Image(gameplay.findRegion(RegionNames.SPEEDOMETER));
+
+        // Ustvarimo besedili za števce
+        labelPlayer1 = new Label("0", skin, "david");
+        labelPlayer2 = new Label("0", skin, "david");
+
+        labelPlayer1.setAlignment(Align.center);
+        labelPlayer2.setAlignment(Align.center);
+
+        // Uporabimo Stack za levega igralca
+        Stack leftStack = new Stack();
+        leftStack.add(speedometerLeft); // Dodamo sliko števca
+        leftStack.add(labelPlayer1);   // Dodamo besedilo na sredino slike
+
+        // Uporabimo Stack za desnega igralca
+        Stack rightStack = new Stack();
+        rightStack.add(speedometerRight); // Dodamo sliko števca
+        rightStack.add(labelPlayer2);     // Dodamo besedilo na sredino slike
+
+        // Dodamo Stack elemente v glavno tabelo
+        table.add(leftStack).expandX().left().padRight(50).width(150).height(150); // Leva stran
+        table.add(rightStack).expandX().right().padLeft(50).width(150).height(150); // Desna stran
+
+        return table;
+    }
+
+
+    private Table bottomNavigationUI() {
         Table table = new Table();
         table.defaults().pad(20);
 
@@ -200,14 +239,8 @@ public class DavidGameScreen extends ScreenAdapter {
             }
         });
 
-        labelPlayer1 = new Label("Player 1 Speed: 0", skin, "david");
-        labelPlayer2 = new Label("Player 2 Speed: 0", skin, "david");
-
-        table.bottom().left().pad(20);
-        table.add(backButton).left();
-
-        table.add(labelPlayer1).center();
-        table.add(labelPlayer2).right();
+        table.bottom().pad(20);
+        table.add(backButton).center();
 
         table.setFillParent(true);
 

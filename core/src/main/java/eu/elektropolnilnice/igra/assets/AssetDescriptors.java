@@ -17,6 +17,8 @@ public class AssetDescriptors {
 //
     public static final AssetDescriptor<TextureAtlas> DAVID_GAMEPLAY =
             new AssetDescriptor<TextureAtlas>(AssetPaths.GAMEPLAY.DAVID_GAMEPLAY, TextureAtlas.class);
+    public static final AssetDescriptor<TextureAtlas> DAVID_CARS =
+        new AssetDescriptor<TextureAtlas>(AssetPaths.GAMEPLAY.DAVID_CARS, TextureAtlas.class);
 //
 //    public static final AssetDescriptor<Music> BACKGROUND_GAME_MUSIC =
 //            new AssetDescriptor<Music>(AssetPaths.BACKGROUND_GAME_MUSIC, Music.class);

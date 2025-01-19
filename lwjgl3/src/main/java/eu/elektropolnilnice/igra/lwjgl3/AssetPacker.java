@@ -20,7 +20,7 @@ public class AssetPacker {
         TexturePacker.process(settings,
             RAW_ASSETS_PATH + "/gameplay_name",
             ASSETS_PATH + "/gameplay",
-            "gameplay_name"
+            "gameplay"
         );
 
 //        TexturePacker.process(settings,
