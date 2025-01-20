@@ -77,6 +77,7 @@ public class FilipMenuScreen extends ScreenAdapter {
 //        Label title = new Label("Not time to park", skin);
         Image titleImage = new Image(title);
         TextButton playButton = new TextButton("PLAY", skin);
+        TextButton helpButton = new TextButton("How to play", skin);
         TextButton backButton = new TextButton("BACK", skin);
         playButton.addListener(new ClickListener() {
             @Override
@@ -92,9 +93,17 @@ public class FilipMenuScreen extends ScreenAdapter {
             }
         });
 
+        helpButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Main.Instance().setScreen(new FilipHelpScreen());
+            }
+        });
+
         table.add(titleImage).center();
         table.row();
         table.add(playButton).center().row();
+        table.add(helpButton).center().row();
         table.add(backButton).center();
         table.center();
         table.setFillParent(true);
