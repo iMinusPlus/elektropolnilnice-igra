@@ -68,7 +68,7 @@ public class FilipHelpScreen extends ScreenAdapter {
             skin);
         helpLabel.setWrap(true);
         helpLabel.setPosition(Gdx.graphics.getWidth() / 2f - helpLabel.getWidth() / 2, Gdx.graphics.getHeight() * 0.6f);
-        helpLabel.setScale(2f);
+        helpLabel.setScale(6f);
 
         // Back button
         TextButton backButton = new TextButton("Back to Menu", skin);

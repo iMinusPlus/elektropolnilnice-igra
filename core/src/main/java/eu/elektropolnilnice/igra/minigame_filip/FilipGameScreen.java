@@ -22,6 +22,7 @@ import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -63,6 +64,7 @@ public class FilipGameScreen extends ScreenAdapter {
 
     boolean hasCollided = false;
     boolean isGameOver = false;
+    boolean victory = false;
 
     private Stage stage;
 
@@ -159,9 +161,10 @@ public class FilipGameScreen extends ScreenAdapter {
 
         elapsedTime = 0;
         isGameOver = false;
+        victory = false;
         carEngine.play();
         carEngine.setLooping(true);
-        carEngine.setVolume(0.5f);
+        carEngine.setVolume(0.05f);
     }
 
     @Override
@@ -171,9 +174,6 @@ public class FilipGameScreen extends ScreenAdapter {
         float deltaTime = Gdx.graphics.getDeltaTime();
         timeSinceFinish += deltaTime;
 
-        if (!isGameOver) {
-            elapsedTime += delta;
-        }
 
         camera.update();
         camera.zoom = .65f;
@@ -181,8 +181,20 @@ public class FilipGameScreen extends ScreenAdapter {
         tiledMapRenderer.render();
         tiledMapRenderer.getBatch().begin();
 
+        if (!isGameOver) {
+            elapsedTime += delta;
+            // Check for overlaps with the player's polygon
+            checkCarOverlapsWithPlayer();
+            playerController.update(deltaTime, tiledMapRenderer.getBatch());
+        } else {
+            carEngine.stop();
+            if (victory) {
+                showYouWinModal();
+            } else {
+                showGameOverModal();
+            }
+        }
 
-//        player.draw(tiledMapRenderer.getBatch());
         font.draw(tiledMapRenderer.getBatch(), "Time to park: " + String.format("%.2f", elapsedTime), 2525f, 2000f);
 
         int i = 0;
@@ -212,7 +224,6 @@ public class FilipGameScreen extends ScreenAdapter {
             }
         }
 
-        playerController.update(deltaTime, tiledMapRenderer.getBatch());
         tiledMapRenderer.getBatch().end();
 
         if (debug) {
@@ -237,9 +248,6 @@ public class FilipGameScreen extends ScreenAdapter {
 //        Gdx.app.log("pol", Arrays.toString(playerController.getPolygon().getTransformedVertices()));
 //        shapeRenderer.polygon(playerController.getPolygon().getTransformedVertices()); // Draw the polygon
 //        shapeRenderer.end();
-
-        // Check for overlaps with the player's polygon
-        checkCarOverlapsWithPlayer();
 
         if (false) {
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled); // Uporabite Filled za debelo črto
@@ -271,35 +279,39 @@ public class FilipGameScreen extends ScreenAdapter {
     }
 
     private void checkCarOverlapsWithPlayer() {
-        Polygon playerPolygon = playerController.getPolygon();
+//        Polygon playerPolygon = playerController.getPolygon();
 
         int carCount = 0;
         for (MapObject mapObject : carObjects) {
             if (mapObject instanceof RectangleMapObject) {
                 Rectangle rectangle = ((RectangleMapObject) mapObject).getRectangle();
 
-                // Create a polygon for the car
-                Polygon carPolygon = new Polygon(new float[] {
-                        rectangle.x, rectangle.y, // Bottom-left
-                        rectangle.x + rectangle.width, rectangle.y, // Bottom-right
-                        rectangle.x + rectangle.width, rectangle.y + rectangle.height, // Top-right
-                        rectangle.x, rectangle.y + rectangle.height // Top-left
-                });
+//                // Create a polygon for the car
+//                Polygon carPolygon = new Polygon(new float[] {
+//                        rectangle.x, rectangle.y, // Bottom-left
+//                        rectangle.x + rectangle.width, rectangle.y, // Bottom-right
+//                        rectangle.x + rectangle.width, rectangle.y + rectangle.height, // Top-right
+//                        rectangle.x, rectangle.y + rectangle.height // Top-left
+//                });
 
                 if (playerController.getSprite().getBoundingRectangle().overlaps(((RectangleMapObject) mapObject).getRectangle())) {
                     if (cars.get(carCount) == -1) {
                         carCount++;
-                        //TODO check overlapping
-//                        Gdx.app.log("free", "Car is free, no overlaps detected!");
                         float overlapPercentage = calculateOverlapPercentage(playerController.getSprite().getBoundingRectangle(), rectangle); // Uporabimo prejšnjo metodo
-                        if (overlapPercentage > 50f) {
+                        if (overlapPercentage > 80f) {
                             Gdx.app.log("prekrivanje", "Igralec prekriva avto z " + overlapPercentage + "%!");
+                            victory = true;
+                            isGameOver = true;
+                            return;
                         }
                         continue;
                     }
                     Gdx.app.log("overlap", "Player is overlapping with a car!");
                     carCrash.setVolume(0.7f);
                     carCrash.play();
+                    isGameOver = true;
+                    victory = false;
+                    return;
                 }
             }
 
@@ -379,5 +391,101 @@ public class FilipGameScreen extends ScreenAdapter {
             return (intersectionArea / playerArea) * 100f; // Izračuna odstotek prekrivanja glede na igralčevo območje
         }
         return 0f; // Če ni prekrivanja
+    }
+
+    private void showGameOverModal() {
+        // Ustvari osnovno tabelo za modal
+        Table modalTable = new Table();
+        modalTable.setFillParent(true); // Zapolni celoten zaslon
+        modalTable.center(); // Postavi na sredino
+
+        // Besedilo "Game Over"
+        BitmapFont gameOverFont = new BitmapFont();
+        gameOverFont.getData().setScale(6f); // Povečajte pisavo za vidnost
+        Label.LabelStyle labelStyle = new Label.LabelStyle(gameOverFont, Color.RED);
+        Label gameOverLabel = new Label("Game Over", labelStyle);
+
+        // Gumbi
+        TextButton resetButton = new TextButton("RESET", Main.Instance().getSkin());
+        TextButton backButton = new TextButton("BACK", Main.Instance().getSkin());
+
+        // Definicija obnašanja za gumbe
+        resetButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Main.Instance().setScreen(new FilipGameScreen()); // Ponovni zagon igre
+            }
+        });
+
+        backButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Main.Instance().setScreen(new FilipMenuScreen()); // Vrnitev v meni
+            }
+        });
+
+        // Dodajte elemente v tabelo
+        modalTable.add(gameOverLabel).padBottom(50).row();
+        modalTable.add(resetButton).pad(10).row();
+        modalTable.add(backButton).pad(10).row();
+
+        // Dodajte tabelo v "stage"
+        stage.addActor(modalTable);
+    }
+
+    private void showYouWinModal() {
+
+        // Ustvari črno ozadje
+        Table background = new Table();
+        background.setFillParent(true); // Zapolnite celoten zaslon
+        background.setColor(new Color(0, 0, 0, 0.7f)); // Črna z 70% prosojnosti (RGBA)
+
+        // Dodajte črno barvo ozadja
+        stage.addActor(background);
+
+        // Ustvari osnovno tabelo za modal
+        Table modalTable = new Table();
+        modalTable.setFillParent(true); // Zapolni celoten zaslon
+        modalTable.center(); // Postavi na sredino
+
+        // Besedilo "You Win"
+        BitmapFont winFont = new BitmapFont();
+        winFont.getData().setScale(6f); // Povečajte pisavo za vidnost
+        Label.LabelStyle labelStyle = new Label.LabelStyle(winFont, Color.GREEN); // Zelena barva za zmago
+        Label youWinLabel = new Label("You Win!", labelStyle);
+
+        // Izračunali bomo čas v sekundah in dodali kot besedilo
+        BitmapFont timerFont = new BitmapFont();
+        timerFont.getData().setScale(3f); // Povečajte pisavo za vidnost
+        String timeTakenText = "Time Taken: " + String.format("%.2f", elapsedTime) + " seconds";
+        Label timeLabel = new Label(timeTakenText, new Label.LabelStyle(timerFont, Color.WHITE));
+
+        // Gumbi
+        TextButton resetButton = new TextButton("RESET", Main.Instance().getSkin());
+        TextButton backButton = new TextButton("BACK", Main.Instance().getSkin());
+
+        // Definicija obnašanja za gumbe
+        resetButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Main.Instance().setScreen(new FilipGameScreen()); // Ponovni zagon igre
+            }
+        });
+
+        backButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Main.Instance().setScreen(new FilipMenuScreen()); // Vrnitev v meni
+            }
+        });
+
+        // Dodajte elemente v tabelo
+        modalTable.add(youWinLabel).padBottom(50).row();
+        modalTable.add(timeLabel).padBottom(50).row(); // Čas
+        modalTable.add(resetButton).pad(10).row();
+        modalTable.add(backButton).pad(10).row();
+
+        // Dodajte tabelo v "stage"
+        stage.addActor(modalTable);
     }
 }
