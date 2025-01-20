@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -49,10 +48,8 @@ public class GameScreen extends ScreenAdapter {
     private TiledMap tiledMap;
     private TiledMapTileLayer grassLayer;
     private TiledMapTileLayer roadLayer;
-    private MapObjects mapObjects;
     private OrthogonalTiledMapRenderer tiledMapRenderer;
 
-    private Sound sound;
     private Texture carTexture;
     private Sprite player;
 
@@ -78,7 +75,6 @@ public class GameScreen extends ScreenAdapter {
         tiledMap = new TmxMapLoader().load("tiledmap/minigame_road1.tmx");
         tiledMapRenderer = new OrthogonalTiledMapRenderer(tiledMap);
 
-        // Pridobivanje dimenzij zemljevida
         grassLayer = (TiledMapTileLayer) tiledMap.getLayers().get("ozadje");
         roadLayer = (TiledMapTileLayer) tiledMap.getLayers().get("cesta");
         tileWidth = grassLayer.getTileWidth();
@@ -86,15 +82,13 @@ public class GameScreen extends ScreenAdapter {
         mapWidthInPx = grassLayer.getWidth() * tileWidth;
         mapHeightInPx = grassLayer.getHeight() * tileHeight;
 
-        // Kamera je postavljena na središče zemljevida
         camera.setToOrtho(false, viewport.getWorldWidth(), viewport.getWorldHeight());
         camera.position.set(mapWidthInPx / 2f, mapHeightInPx / 2f, 0);
         camera.update();
 
-        // Nalaganje teksture in nastavljanje igralca
         carTexture = new Texture("gameplay/carBlue.png");
         player = new Sprite(carTexture);
-        player.setScale(0.35f); // Pomanjšamo igralca na 50% originalne velikosti
+        player.setScale(0.35f);
         setPlayerStartPosition();
 
         font = new BitmapFont();

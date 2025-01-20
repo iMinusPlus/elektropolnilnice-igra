@@ -4,10 +4,11 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -26,6 +27,8 @@ public class GabiMenuScreen extends ScreenAdapter {
     private Viewport viewport;
     private Stage stage;
     private Skin skin;
+    Texture background;
+    Texture title;
 
     public GabiMenuScreen() {
         assetManager = Main.Instance().getAssetManager();
@@ -38,8 +41,12 @@ public class GabiMenuScreen extends ScreenAdapter {
 
         assetManager.load(AssetDescriptors.UI_SKIN);
         assetManager.finishLoading();
+        background = new Texture("assets_raw/gameplay_gabi/background.jpg");
+        title = new Texture("assets_raw/gameplay_gabi/title.png");
 
         skin = assetManager.get(AssetDescriptors.UI_SKIN);
+
+
 
         stage.addActor(createUi());
         Gdx.input.setInputProcessor(stage);
@@ -53,7 +60,10 @@ public class GabiMenuScreen extends ScreenAdapter {
     @Override
     public void render(float delta) {
         ScreenUtils.clear(Color.LIGHT_GRAY);
-
+        Main.Instance().getBatch().begin();
+        Main.Instance().getBatch().setColor(1, 1, 1, 0.5f);
+        Main.Instance().getBatch().draw(background, 0, 0, GameConfig.HUD_WIDTH, GameConfig.HUD_HEIGHT);
+        Main.Instance().getBatch().end();
         stage.act(delta);
         stage.draw();
     }
@@ -72,7 +82,7 @@ public class GabiMenuScreen extends ScreenAdapter {
         Table table = new Table();
         table.defaults().pad(20);
 
-        Label title = new Label("Gabis MINIGAME", skin);
+        Image titleImage = new Image(title);
         TextButton playButton = new TextButton("PLAY", skin);
         playButton.addListener(new ClickListener() {
             @Override
@@ -81,9 +91,19 @@ public class GabiMenuScreen extends ScreenAdapter {
             }
         });
 
-        table.add(title).center();
+        TextButton helpButton = new TextButton("HELP", skin);
+        helpButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Main.Instance().setScreen(new GabiHelpScreen());
+            }
+        });
+
+        table.add(titleImage).center();
         table.row();
         table.add(playButton).center();
+        table.row();
+        table.add(helpButton).center();
         table.center();
         table.setFillParent(true);
 
