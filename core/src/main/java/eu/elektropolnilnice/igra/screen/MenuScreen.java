@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -17,6 +16,7 @@ import eu.elektropolnilnice.igra.GameConfig;
 import eu.elektropolnilnice.igra.Main;
 import eu.elektropolnilnice.igra.assets.AssetDescriptors;
 import eu.elektropolnilnice.igra.minigame_david.screen.DavidMenuScreen;
+import eu.elektropolnilnice.igra.minigame_filip.FilipMenuScreen;
 import eu.elektropolnilnice.igra.minigame_gabi.GabiMenuScreen;
 import eu.elektropolnilnice.igra.utils.Station;
 
@@ -114,7 +114,7 @@ public class MenuScreen extends ScreenAdapter {
 
         Label gamesLabel = new Label("Games to play ...", skin);
         TextButton playButtonDavid = new TextButton("Drag racing", skin);
-        TextButton playButtonFilip = new TextButton("Wires game", skin);
+        TextButton playButtonFilip = new TextButton("Parking game", skin);
         TextButton playButtonGabi = new TextButton("Car racing", skin);
         TextButton backButton = new TextButton("Back", skin);
 
@@ -130,7 +130,7 @@ public class MenuScreen extends ScreenAdapter {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 Gdx.app.log("MenuScreen", "Setting filip screen");
-                Main.Instance().setScreen(new eu.elektropolnilnice.igra.minigame_filip.StartScreen());
+                Main.Instance().setScreen(new FilipMenuScreen());
             }
         });
 

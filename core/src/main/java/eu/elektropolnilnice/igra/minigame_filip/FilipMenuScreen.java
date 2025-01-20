@@ -1,7 +1,6 @@
 package eu.elektropolnilnice.igra.minigame_filip;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
@@ -19,16 +18,16 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import eu.elektropolnilnice.igra.GameConfig;
 import eu.elektropolnilnice.igra.Main;
 import eu.elektropolnilnice.igra.assets.AssetDescriptors;
-import eu.elektropolnilnice.igra.minigame_filip.GameScreen;
+import eu.elektropolnilnice.igra.screen.MenuScreen;
 
-public class StartScreen extends ScreenAdapter {
+public class FilipMenuScreen extends ScreenAdapter {
 
     private final AssetManager assetManager;
     private Viewport viewport;
     private Stage stage;
     private Skin skin;
 
-    public StartScreen() {
+    public FilipMenuScreen() {
         this.assetManager = Main.Instance().getAssetManager();
     }
 
@@ -68,18 +67,27 @@ public class StartScreen extends ScreenAdapter {
         Table table = new Table();
         table.defaults().pad(20);
 
-        Label title = new Label("Connect the wires", skin);
+        Label title = new Label("Not time to park", skin);
         TextButton playButton = new TextButton("PLAY", skin);
+        TextButton backButton = new TextButton("BACK", skin);
         playButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                Main.Instance().setScreen(new GameScreen());
+                Main.Instance().setScreen(new FilipGameScreen());
+            }
+        });
+
+        backButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Main.Instance().setScreen(new MenuScreen());
             }
         });
 
         table.add(title).center();
         table.row();
-        table.add(playButton).center();
+        table.add(playButton).center().row();
+        table.add(backButton).center();
         table.center();
         table.setFillParent(true);
 
