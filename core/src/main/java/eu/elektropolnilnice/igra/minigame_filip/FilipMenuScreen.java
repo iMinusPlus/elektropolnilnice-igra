@@ -4,13 +4,11 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -27,6 +25,9 @@ public class FilipMenuScreen extends ScreenAdapter {
     private Stage stage;
     private Skin skin;
 
+    Texture background;
+    Texture title;
+
     public FilipMenuScreen() {
         this.assetManager = Main.Instance().getAssetManager();
     }
@@ -36,6 +37,9 @@ public class FilipMenuScreen extends ScreenAdapter {
         viewport = new FitViewport(GameConfig.HUD_WIDTH, GameConfig.HUD_HEIGHT);
         stage = new Stage(viewport, Main.Instance().getBatch());
         skin = assetManager.get(AssetDescriptors.UI_SKIN);
+
+        background = new Texture("assets_raw/gameplay_filip/wallpaper.jpg");
+        title = new Texture("assets_raw/gameplay_filip/title.png");
 
         stage.addActor(createUi());
         Gdx.input.setInputProcessor(stage);
@@ -53,7 +57,10 @@ public class FilipMenuScreen extends ScreenAdapter {
     @Override
     public void render(float delta) {
         ScreenUtils.clear(Color.LIGHT_GRAY);
-
+        Main.Instance().getBatch().begin();
+        Main.Instance().getBatch().setColor(1, 1, 1, 0.5f);
+        Main.Instance().getBatch().draw(background, 0, 0, GameConfig.HUD_WIDTH, GameConfig.HUD_HEIGHT);
+        Main.Instance().getBatch().end();
         stage.act(delta);
         stage.draw();
     }
@@ -67,8 +74,10 @@ public class FilipMenuScreen extends ScreenAdapter {
         Table table = new Table();
         table.defaults().pad(20);
 
-        Label title = new Label("Not time to park", skin);
+//        Label title = new Label("Not time to park", skin);
+        Image titleImage = new Image(title);
         TextButton playButton = new TextButton("PLAY", skin);
+        TextButton helpButton = new TextButton("How to play", skin);
         TextButton backButton = new TextButton("BACK", skin);
         playButton.addListener(new ClickListener() {
             @Override
@@ -84,9 +93,17 @@ public class FilipMenuScreen extends ScreenAdapter {
             }
         });
 
-        table.add(title).center();
+        helpButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Main.Instance().setScreen(new FilipHelpScreen());
+            }
+        });
+
+        table.add(titleImage).center();
         table.row();
         table.add(playButton).center().row();
+        table.add(helpButton).center().row();
         table.add(backButton).center();
         table.center();
         table.setFillParent(true);

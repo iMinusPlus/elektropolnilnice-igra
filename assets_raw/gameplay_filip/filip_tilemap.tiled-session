@@ -3,10 +3,22 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "",
+    "activeFile": "parking_lot.tmx",
     "expandedProjectPaths": [
     ],
     "fileStates": {
+        "parking_lot.tmx": {
+            "scale": 0.33,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 2219.6969696969695,
+                "y": 1030.3030303030303
+            }
+        },
+        "parking_lot_set.tsx": {
+            "scaleInDock": 0.5,
+            "scaleInEditor": 0.75
+        }
     },
     "last.imagePath": "C:/Users/filip/IdeaProjects/elektropolnilnice-igra/assets_raw/gameplay_filip",
     "map.height": 40,
@@ -15,9 +27,13 @@
     "map.tileWidth": 64,
     "map.width": 60,
     "openFiles": [
+        "parking_lot.tmx",
+        "parking_lot_set.tsx"
     ],
     "project": "filip_tilemap.tiled-project",
     "recentFiles": [
+        "parking_lot_set.tsx",
+        "parking_lot.tmx"
     ],
     "tileset.lastUsedFormat": "tsx",
     "tileset.tileSize": {
