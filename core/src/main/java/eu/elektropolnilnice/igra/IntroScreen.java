@@ -4,21 +4,18 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Group;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
-import eu.elektropolnilnice.igra.screen.MapScreen;
 import eu.elektropolnilnice.igra.screen.MenuScreen;
 
 public class IntroScreen extends ScreenAdapter {
-    public static final float INTRO_DURATION_IN_SEC = 3f;   // duration of the intro animation
+    public static final float INTRO_DURATION_IN_SEC = 3f; // duration of the intro animation
 
     private final Game game;
     private final AssetManager assetManager;
@@ -26,11 +23,8 @@ public class IntroScreen extends ScreenAdapter {
     private Viewport viewport;
     private Stage stage;
 
-    private BitmapFont font;
-
     private float duration = 0f;
 
-    Group group = new Group();
     public IntroScreen(Game game) {
         this.game = game;
         assetManager = new AssetManager();
@@ -41,14 +35,36 @@ public class IntroScreen extends ScreenAdapter {
         viewport = new FitViewport(GameConfig.HUD_WIDTH, GameConfig.HUD_HEIGHT);
         stage = new Stage(viewport);
 
-        // Load font
-        font = new BitmapFont();
-        font.getData().setScale(2f); // Scale font to make it bigger
+        // Load assets
+        Texture carLogoTexture = new Texture("assets_raw/intro/carlogo.png");
+        Texture lightningTexture = new Texture("assets_raw/intro/lightning.png");
 
-        stage.addActor(createCentralI());
-        stage.addActor(createDash());
-        stage.addActor(createPlus());
-        group.setScale(10f);
+        // Create car logo actor
+        Image carLogo = new Image(carLogoTexture);
+        carLogo.setSize(carLogo.getWidth() * 0.5f, carLogo.getHeight() * 0.5f); // Scale down
+        carLogo.setPosition(viewport.getWorldWidth(), viewport.getWorldHeight() / 2 - carLogo.getHeight() / 2);
+
+        // Create lightning actor
+        Image lightning = new Image(lightningTexture);
+        lightning.setSize(lightning.getWidth() * 0.5f, lightning.getHeight() * 0.5f); // Scale down
+        lightning.setPosition(viewport.getWorldWidth() / 2 - lightning.getWidth() / 2,
+            viewport.getWorldHeight()); // Start at the top of the screen
+        lightning.setColor(1, 1, 1, 0); // Start invisible
+
+        // Add animation for car logo
+        carLogo.addAction(Actions.sequence(
+            Actions.moveTo(viewport.getWorldWidth() / 2 - carLogo.getWidth() / 2, carLogo.getY(), 1.5f), // Drive in
+            Actions.run(() -> lightning.addAction(Actions.sequence(
+                Actions.fadeIn(0.1f),
+                Actions.moveTo(viewport.getWorldWidth() / 2 - lightning.getWidth() / 2,
+                    viewport.getWorldHeight() / 2 - lightning.getHeight() / 2, 0.1f)// Fall fast
+            ))), // Trigger lightning
+            Actions.delay(1f)
+        ));
+
+        // Add actors to the stage
+        stage.addActor(carLogo);
+        stage.addActor(lightning);
     }
 
     @Override
@@ -64,7 +80,7 @@ public class IntroScreen extends ScreenAdapter {
 
         // Go to the MenuScreen after INTRO_DURATION_IN_SEC seconds
         if (duration > INTRO_DURATION_IN_SEC) {
-             game.setScreen(new MapScreen());
+            game.setScreen(new MenuScreen());
         }
 
         stage.act(delta);
@@ -79,76 +95,6 @@ public class IntroScreen extends ScreenAdapter {
     @Override
     public void dispose() {
         stage.dispose();
-        font.dispose();
+        assetManager.dispose();
     }
-
-
-    private Actor createCentralI() {
-        Label.LabelStyle style = new Label.LabelStyle(font, Color.WHITE);
-        Label centralI = new Label("i", style);
-        group.addActor(centralI);
-
-        centralI.setPosition(
-            viewport.getWorldWidth() / 2f - centralI.getWidth() / 2f,
-            viewport.getWorldHeight() / 2f - centralI.getHeight() / 2f
-        );
-        return centralI;
-    }
-
-    private Actor createDash() {
-        Label.LabelStyle style = new Label.LabelStyle(font, Color.WHITE);
-        Label dash = new Label("-", style);
-        group.addActor(dash);
-
-        // Start position: Bottom of the screen
-        dash.setPosition(
-            viewport.getWorldWidth() / 2f - dash.getWidth() / 2f,
-            -dash.getHeight()
-        );
-
-        // Final position: Center of the screen (slightly below "i")
-        float finalX = viewport.getWorldWidth() / 2f - dash.getWidth() / 2f + 20f;
-        float finalY = viewport.getWorldHeight() / 2f - 20;
-
-        // Add animation with progressively smaller bounces
-        dash.addAction(Actions.sequence(
-            Actions.moveTo(finalX, finalY + 40, 0.6f),  // Large bounce
-            Actions.moveBy(0, -30, 0.4f),              // Medium downward bounce
-            Actions.moveBy(0, 20, 0.4f),               // Small upward bounce
-            Actions.moveBy(0, -10, 0.3f),              // Final small downward bounce
-            Actions.moveTo(finalX, finalY, 0.2f)       // Smoothly settle at the final position
-        ));
-
-        return dash;
-    }
-
-
-    private Actor createPlus() {
-        Label.LabelStyle style = new Label.LabelStyle(font, Color.WHITE);
-        Label plus = new Label("+", style);
-        group.addActor(plus);
-
-        // Start position: Top of the screen
-        plus.setPosition(
-            viewport.getWorldWidth() / 2f - plus.getWidth() / 2f,
-            viewport.getWorldHeight()
-        );
-
-        // Final position: Center of the screen (slightly above "i")
-        float finalX = viewport.getWorldWidth() / 2f - plus.getWidth() / 2f + 50f;
-        float finalY = viewport.getWorldHeight() / 2f - 20;
-
-        // Add animation with progressively smaller bounces
-        plus.addAction(Actions.sequence(
-            Actions.moveTo(finalX, finalY - 40, 0.6f),  // Large bounce
-            Actions.moveBy(0, 30, 0.4f),               // Medium upward bounce
-            Actions.moveBy(0, -20, 0.4f),              // Small downward bounce
-            Actions.moveBy(0, 10, 0.3f),               // Final small upward bounce
-            Actions.moveTo(finalX, finalY, 0.2f)       // Smoothly settle at the final position
-        ));
-
-        return plus;
-    }
-
-
 }
