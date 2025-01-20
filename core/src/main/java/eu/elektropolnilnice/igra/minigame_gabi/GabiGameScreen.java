@@ -20,6 +20,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import eu.elektropolnilnice.igra.Main;
+import eu.elektropolnilnice.igra.screen.MapScreen;
+
 public class GabiGameScreen extends ScreenAdapter {
     private OrthographicCamera camera;
 
@@ -60,6 +63,10 @@ public class GabiGameScreen extends ScreenAdapter {
 
     @Override
     public void show() {
+        setupGame();
+    }
+
+    private void setupGame() {
         camera = new OrthographicCamera();
 
         tiledMap = new TmxMapLoader().load("assets_raw/gameplay_gabi/Track1.tmx");
@@ -107,6 +114,8 @@ public class GabiGameScreen extends ScreenAdapter {
             elapsedTime += delta;
             handleGameplayInput(delta);
             checkCollisions();
+        } else {
+            handleEndGameInput(); // Detect key inputs (R and B) when the race is completed
         }
 
         camera.update();
@@ -119,13 +128,15 @@ public class GabiGameScreen extends ScreenAdapter {
         font.draw(tiledMapRenderer.getBatch(), "Time: " + String.format("%.2f", elapsedTime), 20f, 120f);
 
         if (raceCompleted) {
-            font.draw(tiledMapRenderer.getBatch(), "Race Complete!", camera.viewportWidth / 2f - 50f, camera.viewportHeight / 2f);
-            font.draw(tiledMapRenderer.getBatch(), "Leaderboard:", camera.viewportWidth / 2f - 50f, camera.viewportHeight / 2f - 150f);
+            font.draw(tiledMapRenderer.getBatch(), "Race Complete!", camera.viewportWidth / 2f - 150f, camera.viewportHeight / 2f + 50f);
+            font.draw(tiledMapRenderer.getBatch(), "Press R to Restart", camera.viewportWidth / 2f - 150f, camera.viewportHeight / 2f - 20f);
+            font.draw(tiledMapRenderer.getBatch(), "Press B to Go Back to Map", camera.viewportWidth / 2f - 150f, camera.viewportHeight / 2f - 80f);
             for (int i = 0; i < leaderboard.size(); i++) {
-                font.draw(tiledMapRenderer.getBatch(), (i + 1) + ". " + String.format("%.2f", leaderboard.get(i)), camera.viewportWidth / 2f - 50f, camera.viewportHeight / 2f - 75f - (i * 20));
+                font.draw(tiledMapRenderer.getBatch(), (i + 1) + ". " + String.format("%.2f", leaderboard.get(i)), camera.viewportWidth / 2f - 50f, camera.viewportHeight / 2f - 150f - (i * 20));
             }
         }
-        if (timeSinceCollision > 2f){
+
+        if (timeSinceCollision > 2f) {
             playerSpeed = Math.min((playerSpeed + accelerationRate * delta), maxSpeed);
         }
 
@@ -133,48 +144,59 @@ public class GabiGameScreen extends ScreenAdapter {
     }
 
     private void handleGameplayInput(float delta) {
-        // Gradually increase the speed over time
         playerSpeed = Math.min(playerSpeed + accelerationRate * delta, maxSpeed);
 
-        // Movement deltas
         float dx = 0;
         float dy = 0;
 
-        // Forward movement (W key)
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
             dx += (float) Math.cos(Math.toRadians(player.getRotation())) * playerSpeed * delta;
             dy += (float) Math.sin(Math.toRadians(player.getRotation())) * playerSpeed * delta;
         }
 
-        // Backward movement (S key)
         if (Gdx.input.isKeyPressed(Input.Keys.S)) {
             dx -= (float) Math.cos(Math.toRadians(player.getRotation())) * playerSpeed * delta;
             dy -= (float) Math.sin(Math.toRadians(player.getRotation())) * playerSpeed * delta;
         }
 
-        // Rotation (A and D keys)
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-            player.rotate(200f * delta); // Rotation speed
+            player.rotate(200f * delta);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-            player.rotate(-200f * delta); // Rotation speed
+            player.rotate(-200f * delta);
         }
 
-        // Calculate the next position
         float nextX = player.getX() + dx;
         float nextY = player.getY() + dy;
 
-        // Check for collisions before applying the movement
         if (!isCollidingWithStructures(nextX, nextY)) {
             player.setPosition(nextX, nextY);
         }
     }
 
+    private void handleEndGameInput() {
+        if (Gdx.input.isKeyPressed(Input.Keys.R)) {
+            restartGame();
+        }
+
+        if (Gdx.input.isKeyPressed(Input.Keys.B)) {
+            goBackToMap();
+        }
+    }
+
+    private void restartGame() {
+        setupGame();
+    }
+
+    private void goBackToMap() {
+        // Implement navigation logic to the map screen
+        Main.Instance().setScreen(new MapScreen());
+    }
+
     private void checkCollisions() {
         for (MapObject mapObject : blockersObj) {
             if (player.getBoundingRectangle().overlaps(((RectangleMapObject) mapObject).getRectangle())) {
-                // Collision with barrier - slow down the player
-                playerSpeed = Math.max(playerSpeed - decelerationRate, 200f); // Don't go below 200 speed
+                playerSpeed = Math.max(playerSpeed - decelerationRate, 200f);
                 timeSinceCollision = 0f;
             }
         }
