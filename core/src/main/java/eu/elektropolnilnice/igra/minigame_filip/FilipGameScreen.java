@@ -20,8 +20,12 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import eu.elektropolnilnice.igra.Main;
+
+import java.util.Objects;
+import java.util.Random;
 
 public class FilipGameScreen extends ScreenAdapter {
 
@@ -38,6 +42,8 @@ public class FilipGameScreen extends ScreenAdapter {
     private Texture carR;
     private Texture carY;
     private Sprite player;
+    private Array<Integer> cars;
+    private int freeParkingPos;
 
     private BitmapFont font;
 
@@ -76,6 +82,7 @@ public class FilipGameScreen extends ScreenAdapter {
         carY = new Texture("assets_raw/gameplay_filip/cary.png");
         carR = new Texture("assets_raw/gameplay_filip/carr.png");
         carG = new Texture("assets_raw/gameplay_filip/carg.png");
+        cars = new Array<>();
 
         for (MapObject mapObject : carObjects) {
             // get the loactions of these objects
@@ -90,9 +97,11 @@ public class FilipGameScreen extends ScreenAdapter {
                 float x = rectangle.x;
                 float y = rectangle.y;
 
-                // Now you can render your car at (x, y)
-//                renderCar(x, y);//
                 Gdx.app.log("car", "x: " + x + " y: " + y);
+
+                Random random = new Random();
+                int randomNumber = random.nextInt(4);
+                cars.add(randomNumber);
             }
         }
 
@@ -131,6 +140,7 @@ public class FilipGameScreen extends ScreenAdapter {
         player.draw(tiledMapRenderer.getBatch());
         font.draw(tiledMapRenderer.getBatch(), "Time to park: " + String.format("%.2f", elapsedTime), 2525f, 2000f);
 
+        int i = 0;
         for (MapObject mapObject : carObjects) {
             if (mapObject instanceof RectangleMapObject) {
                 Rectangle rectangle = ((RectangleMapObject) mapObject).getRectangle();
@@ -140,15 +150,13 @@ public class FilipGameScreen extends ScreenAdapter {
                 float centerY = rectangle.y + rectangle.height / 2;
 
                 // Create a new sprite for each car
-                Sprite carSprite = new Sprite(carB);
+                Sprite carSprite = new Sprite(Objects.requireNonNull(getCarSprite(cars.get(i))));
                 carSprite.setPosition(centerX - carB.getHeight(), centerY- carB.getWidth() / 2);
-
-                // Optionally, set the size of the sprite
-//                carSprite.setSize(rectangle.width, rectangle.height);
                 carSprite.setRotation(90);
 
                 // Draw the car sprite
                 carSprite.draw(tiledMapRenderer.getBatch());
+                i++;
             }
         }
 
@@ -157,6 +165,22 @@ public class FilipGameScreen extends ScreenAdapter {
         stage.act(deltaTime);
         stage.draw();
 
+    }
+
+    private Texture getCarSprite(int carType) {
+        switch (carType) {
+            case 0:
+                return carB;
+            case 1:
+                return carG;
+            case 2:
+                return carR;
+            case 3:
+                return carY;
+            default:
+                break;
+        }
+        return null;
     }
 
     private void handleGameplayInput(float delta) {
