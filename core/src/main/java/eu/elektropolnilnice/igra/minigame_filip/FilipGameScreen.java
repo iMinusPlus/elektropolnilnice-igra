@@ -47,6 +47,7 @@ public class FilipGameScreen extends ScreenAdapter {
 
     Music carEngine;
     Music carCrash;
+    Music w;
     private Texture carB;
     private Texture carG;
     private Texture carR;
@@ -67,10 +68,11 @@ public class FilipGameScreen extends ScreenAdapter {
     boolean victory = false;
 
     private Stage stage;
+    private Table table;
 
     // Debug
 //    private DebugCameraController debugCameraController;
-    boolean debug = true;
+    boolean debug = false;
     ShapeRenderer shapeRenderer = new ShapeRenderer();
 
     @Override
@@ -88,13 +90,15 @@ public class FilipGameScreen extends ScreenAdapter {
         float mapHeightInPx = parkingLot.getHeight() * parkingLot.getTileHeight();
 
         stage = new Stage();
-        stage.addActor(sideNavigationUI());
+        table = sideNavigationUI();
+        stage.addActor(table);
         Gdx.input.setInputProcessor(stage);
         camera.setToOrtho(false, mapWidthInPx, mapHeightInPx);
         camera.update();
 
         carEngine = Gdx.audio.newMusic(Gdx.files.internal("assets_raw/gameplay_filip/car_engine.wav"));
         carCrash = Gdx.audio.newMusic(Gdx.files.internal("assets_raw/gameplay_filip/car_crash.wav"));
+        w = Gdx.audio.newMusic(Gdx.files.internal("assets_raw/gameplay_filip/w.wav"));
         carB = new Texture("assets_raw/gameplay_filip/carb.png");
         carY = new Texture("assets_raw/gameplay_filip/cary.png");
         carR = new Texture("assets_raw/gameplay_filip/carr.png");
@@ -167,6 +171,8 @@ public class FilipGameScreen extends ScreenAdapter {
         carEngine.setVolume(0.05f);
     }
 
+    boolean hasPlayed = false;
+
     @Override
     public void render(float delta) {
         ScreenUtils.clear(0f, 0f, 0f, 1f);
@@ -189,8 +195,19 @@ public class FilipGameScreen extends ScreenAdapter {
         } else {
             carEngine.stop();
             if (victory) {
+                if (table != null) {
+                    table.remove(); // Popolnoma odstranite iz odra
+                }
+                if (!hasPlayed) {
+                    w.play();
+                    w.setVolume(0.7f);
+                    hasPlayed = true;
+                }
                 showYouWinModal();
             } else {
+                if (table != null) {
+                    table.remove(); // Popolnoma odstranite iz odra
+                }
                 showGameOverModal();
             }
         }
@@ -219,8 +236,6 @@ public class FilipGameScreen extends ScreenAdapter {
                 // Draw the car sprite
                 carSprite.draw(tiledMapRenderer.getBatch());
                 i++;
-
-//                System.out.println(playerController.checkOverlapPercentage(carSprite));
             }
         }
 
@@ -240,14 +255,6 @@ public class FilipGameScreen extends ScreenAdapter {
             }
             shapeRenderer.end();
         }
-
-
-//         Draw the polygon for debugging
-//        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-//        shapeRenderer.setColor(Color.RED); // Set the color for the polygon
-//        Gdx.app.log("pol", Arrays.toString(playerController.getPolygon().getTransformedVertices()));
-//        shapeRenderer.polygon(playerController.getPolygon().getTransformedVertices()); // Draw the polygon
-//        shapeRenderer.end();
 
         if (false) {
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled); // Uporabite Filled za debelo črto
@@ -279,20 +286,11 @@ public class FilipGameScreen extends ScreenAdapter {
     }
 
     private void checkCarOverlapsWithPlayer() {
-//        Polygon playerPolygon = playerController.getPolygon();
 
         int carCount = 0;
         for (MapObject mapObject : carObjects) {
             if (mapObject instanceof RectangleMapObject) {
                 Rectangle rectangle = ((RectangleMapObject) mapObject).getRectangle();
-
-//                // Create a polygon for the car
-//                Polygon carPolygon = new Polygon(new float[] {
-//                        rectangle.x, rectangle.y, // Bottom-left
-//                        rectangle.x + rectangle.width, rectangle.y, // Bottom-right
-//                        rectangle.x + rectangle.width, rectangle.y + rectangle.height, // Top-right
-//                        rectangle.x, rectangle.y + rectangle.height // Top-left
-//                });
 
                 if (playerController.getSprite().getBoundingRectangle().overlaps(((RectangleMapObject) mapObject).getRectangle())) {
                     if (cars.get(carCount) == -1) {
