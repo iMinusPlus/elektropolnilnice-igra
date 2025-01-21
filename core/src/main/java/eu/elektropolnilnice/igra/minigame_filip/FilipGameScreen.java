@@ -378,6 +378,7 @@ public class FilipGameScreen extends ScreenAdapter {
         carY.dispose();
         font.dispose();
         carEngine.dispose();
+        w.dispose();
         shapeRenderer.dispose();
     }
 
